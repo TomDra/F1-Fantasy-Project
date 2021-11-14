@@ -18,38 +18,87 @@ def get_drivers():
   file.write(str(detail_driver_list))
 
 def get_race_data():
+  file = open('points.csv', 'w+')
+  file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
+  file.close()
   from datetime import date
-  for year in range(1950,date.today().year+1):  #Cycle through all years of f1
+  for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
     total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
     for race in range(1,int(total_races_in_year)+1):  #Cycle through all the rounds in the year
-      race_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/results.json').content.decode())  #Get the race data 
-      quali_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/qualifying.json').content.decode())  #Get the quali data
-      assign_driver_points(race_data, quali_data)
+      race_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/results.json').content.decode())  #Get the race data
+      #quali_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/qualifying.json').content.decode())  #Get the quali data
+      assign_driver_points(race_data) #,quali_data)
 
-def assign_driver_points(rData, qData): #use race data to assign points to the driver
+def assign_driver_points(rData): #use race data to assign points to the driver
+  team_dict = {}
+  year = rData['MRData']['RaceTable']['Races'][0]['season'] #Get race year
+  round = rData['MRData']['RaceTable']['Races'][0]['round'] #Get race number
+  rName = rData['MRData']['RaceTable']['Races'][0]['raceName']  #Get race name
   #print(len(rData['MRData']['RaceTable']['Races'][0]['Results']))
-  for driver in rData['MRData']['RaceTable']['Races'][0]['Results']:
-    driver_id = driver['Driver']['driverId']
-    finish_position = driver['position']
-    grid_position = driver['grid']
-    constructor = driver['Constructor']['name']
-    try: fastest_lap_position = driver['FastestLap']['rank']
-    except KeyError: fastest_lap_position = 22
-    driver_points = get_race_points(finish_position ,grid_position ,constructor ,teammate_position , fastest_lap_position)
+  try:
+    for driver in rData['MRData']['RaceTable']['Races'][0]['Results']:
+      constructor = driver['Constructor']['name'] #Get drivers team
+      driver_id = driver['Driver']['driverId']  #Get drivers name
+      finish_position = driver['position']  #Get finish pos
+      grid_position = driver['grid']   #Get starting position
+      try: fastest_lap_position = driver['FastestLap']['rank']  #Get fastest lap rank
+      except KeyError: fastest_lap_position = 22
+      if constructor not in team_dict:  #Combines all drivers of the same teams in a dictionary
+          team_dict[constructor] = []
+      team_dict[constructor].append({'driver':driver_id,'fastPosition':fastest_lap_position,'gPosition':grid_position,'fPosition':finish_position}) #make a dictionary which contains all driver data needed and groups drivers by team
+    for team in team_dict:
+      driver1 = team_dict[team][0]
+      try: driver2 = team_dict[team][1]
+      except IndexError: driver2 = {'driver': 'n/a', 'fastPosition': 22, 'gPosition': '22', 'fPosition': '22'}  #If no second driver exists, use filler data
+      points = get_points(driver1,driver2)  #get the driver and constructors points
+      #print(team,points)
+      save_points([driver1['driver'],points['driver1']],[driver2['driver'],points['driver2']],[team,points['constructor']],year,round,rName)
+  except KeyError as a:print(a)
 
-def get_race_points(fPos, gPos, team, teammatePos, fLapPos): #Get all data required and create
-  points = 0
+def save_points(driver1,driver2,team,year,round,rName): #save the points to a csv file
+  file = open('points.csv', 'a+')
+  file.write(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n") #write the points to the csv file
+  file.close()
+
+def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
+  drivers_data = [[int(driver1_data['fPosition']),int(driver1_data['gPosition']),int(driver1_data['fastPosition']),int(driver2_data['fPosition'])],
+  [int(driver2_data['fPosition']),int(driver2_data['gPosition']),int(driver2_data['fastPosition']),int(driver1_data['fPosition'])]] #Creates a list so that all the data can be inputed into the loop
+  driver_points = []
+  team_points = 0
   from point_distribution import assign_points
-  try: points = points + assign_points['DriverPoints']['Race']['Results'][fPos] #add points for finishing finishing top 10 or minus 25 for not finishing
-  except KeyError: points = 0
-  points = points + ((int(gPos)-int(fPos)*assign_points['DriverPoints']['Race']['PGFG'])) #add points for position gained from grid
-  if fLapPos == 1: points = points + assign_points['DriverPoints']['Race']['fLap']  #add points for achiving fastest lap
-  if fPos > teammatePos: points = points + assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
-  elif fPos < teammatePos: points = points + assign_points['DriverPoints']['Race']['DBT'] #add points for finishing below teammate
-  
-  return points
-
-
+  for i in range(0,2):  #loop twice to get both drivers points
+    fPos = drivers_data[i][0] #Extract all data from the list
+    gPos = drivers_data[i][1]
+    fLapPos = drivers_data[i][2]
+    teammatePos = drivers_data[i][3]
+    points=0
+    """Race Points"""
+    try: 
+      points = points + assign_points['DriverPoints']['Race']['Results'][fPos] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
+      team_points = team_points + assign_points['Constructor']['Race']['Results'][fPos] #Add points to team
+    except KeyError: points = 0
+    points = points + ((int(gPos) - int(fPos))* assign_points['DriverPoints']['Race']['PGFG']) #add points to driver for position gained from grid
+    team_points = team_points + ((int(gPos) - int(fPos)) * assign_points['Constructor']['Race']['PGFG'])
+    if fLapPos == 1: 
+      points = points + assign_points['DriverPoints']['Race']['fLap']  #Add points to driver for achiving fastest lap
+      team_points = team_points + assign_points['Constructor']['Race']['fLap']  #Add points to team for fastest lap  
+    if fPos > teammatePos: points = points + assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
+    elif fPos < teammatePos: points = points + assign_points['DriverPoints']['Race']['FBT'] #add points for finishing below teammate
+    try:team_points = team_points + assign_points['Constructor']['Race']['Results'][str(fPos)]  #Add points to team for result in race
+    except KeyError: pass
+    """Quallifying Points"""
+    try: 
+      points = points + assign_points['DriverPoints']['Qualifying']['Results'][gPos]  #Add driver points for qually pos
+      team_points = team_points + assign_points['Constructor']['Qualifying']['Results'][gPos] #Add team points for qually pos
+    except KeyError: pass
+    if gPos < 15:
+      points = points + assign_points['DriverPoints']['Qualifying']['RQ2']  #Add points for qually positions above 15
+      team_points = team_points + assign_points['Constructor']['Qualifying']['RQ2'] #Add team points for qually positions above 15
+    if gPos < 10:
+      points = points + assign_points['DriverPoints']['Qualifying']['RQ3']  #Add points for qually positions above 10
+      team_points = team_points + assign_points['Constructor']['Qualifying']['RQ3'] #Add team points for qually positions above 10
+    driver_points.append(points)
+  return {'constructor':team_points,'driver1':driver_points[0],'driver2':driver_points[1]}
 
 get_drivers()
 get_race_data()
