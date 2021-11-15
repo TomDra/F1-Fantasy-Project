@@ -1,5 +1,7 @@
 import requests #import needed modules
 import ast
+from threading import Thread
+from datetime import date
 def get_drivers():
   data = requests.get('http://ergast.com/api/f1/drivers.json?limit=1900&offset=30')
   drivers = ast.literal_eval(data.content.decode())['MRData']['DriverTable']['Drivers']
@@ -21,13 +23,25 @@ def get_race_data():
   file = open('points.csv', 'w+')
   file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
   file.close()
-  from datetime import date
-  for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
-    total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
-    for race in range(1,int(total_races_in_year)+1):  #Cycle through all the rounds in the year
-      race_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/results.json').content.decode())  #Get the race data
-      #quali_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/qualifying.json').content.decode())  #Get the quali data
+  """use threading to run each year in parallel"""
+  threads=[]
+  for year in range(1950,date.today().year+1):
+    threads.append(Thread(target=year_loop, args=(year,)))
+  for thread in threads:
+    thread.start()
+  thread.join()
+  
+  
+def year_loop(year):
+  #for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
+  total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
+  for race in range(1,int(total_races_in_year)+1):  #Cycle through all the rounds in the year
+    race_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/results.json').content.decode())  #Get the race data
+    #quali_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/qualifying.json').content.decode())  #Get the quali data
+    try:
       assign_driver_points(race_data) #,quali_data)
+    except IndexError as a:
+      print(a)
 
 def assign_driver_points(rData): #use race data to assign points to the driver
   team_dict = {}
@@ -74,8 +88,8 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
     points=0
     """Race Points"""
     try: 
-      points = points + assign_points['DriverPoints']['Race']['Results'][fPos] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
-      team_points = team_points + assign_points['Constructor']['Race']['Results'][fPos] #Add points to team
+      points = points + assign_points['DriverPoints']['Race']['Results'][str(fPos)] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
+      team_points = team_points + assign_points['Constructor']['Race']['Results'][str(fPos)] #Add points to team
     except KeyError: points = 0
     points = points + ((int(gPos) - int(fPos))* assign_points['DriverPoints']['Race']['PGFG']) #add points to driver for position gained from grid
     team_points = team_points + ((int(gPos) - int(fPos)) * assign_points['Constructor']['Race']['PGFG'])
@@ -91,14 +105,17 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
       points = points + assign_points['DriverPoints']['Qualifying']['Results'][gPos]  #Add driver points for qually pos
       team_points = team_points + assign_points['Constructor']['Qualifying']['Results'][gPos] #Add team points for qually pos
     except KeyError: pass
-    if gPos < 15:
+    if gPos <= 15:
       points = points + assign_points['DriverPoints']['Qualifying']['RQ2']  #Add points for qually positions above 15
       team_points = team_points + assign_points['Constructor']['Qualifying']['RQ2'] #Add team points for qually positions above 15
-    if gPos < 10:
+    if gPos <= 10:
       points = points + assign_points['DriverPoints']['Qualifying']['RQ3']  #Add points for qually positions above 10
       team_points = team_points + assign_points['Constructor']['Qualifying']['RQ3'] #Add team points for qually positions above 10
     driver_points.append(points)
   return {'constructor':team_points,'driver1':driver_points[0],'driver2':driver_points[1]}
 
+import time
 get_drivers()
+start = time.time()
 get_race_data()
+print(f"Runtime of the program is {time.time() - start}")
