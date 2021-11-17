@@ -1,7 +1,9 @@
 import requests #import needed modules
 import ast
 from threading import Thread
+import queue
 from datetime import date
+
 def get_drivers():
   data = requests.get('http://ergast.com/api/f1/drivers.json?limit=1900&offset=30')
   drivers = ast.literal_eval(data.content.decode())['MRData']['DriverTable']['Drivers']
@@ -19,19 +21,31 @@ def get_drivers():
     detail_driver_list.append([driver_id,full_name,nationality,DoB,number])
   file.write(str(detail_driver_list))
 
-def get_race_data():
+def save_to_file(queue):
   file = open('points.csv', 'w+')
   file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
+  while finished != True or queue.empty() != True:
+    print(queue.qsize())
+    file.write(queue.get())
   file.close()
+
+def get_race_data():
+  global q,finished
+  q = queue.Queue()
+  finished = False
+  #file = open('points.csv', 'w+')
+  #file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
+  #file.close()
   """use threading to run each year in parallel"""
-  threads=[]
+  threads=[Thread(target=save_to_file, args=(q,))]
   for year in range(1950,date.today().year+1):
     threads.append(Thread(target=year_loop, args=(year,)))
+  #threads.insert(0,Thread(target=save_to_file, args=(q,)))
   for thread in threads:
     thread.start()
   thread.join()
-  
-  
+  finished = True
+  threads[0].join()  
 def year_loop(year):
   #for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
   total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
@@ -70,9 +84,10 @@ def assign_driver_points(rData): #use race data to assign points to the driver
   except KeyError as a:print(a)
 
 def save_points(driver1,driver2,team,year,round,rName): #save the points to a csv file
-  file = open('points.csv', 'a+')
-  file.write(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n") #write the points to the csv file
-  file.close()
+  #file = open('points.csv', 'a+')
+  #file.write(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n") #write the points to the csv file
+  #file.close()
+  q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")
 
 def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
   drivers_data = [[int(driver1_data['fPosition']),int(driver1_data['gPosition']),int(driver1_data['fastPosition']),int(driver2_data['fPosition'])],
