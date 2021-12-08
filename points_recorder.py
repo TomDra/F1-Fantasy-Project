@@ -22,30 +22,32 @@ def get_drivers():
   file.write(str(detail_driver_list))
 
 def save_to_file(queue):
-  file = open('points.csv', 'w+')
-  file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
+  file = open('raw_points.csv', 'w+')
+  file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n') #Write titles of data
   while finished != True or queue.empty() != True:
     print(queue.qsize())
+    """Loop until queue is empty and finished == True"""
     file.write(queue.get())
   file.close()
 
 def get_race_data():
   global q,finished
+  i=1
   q = queue.Queue()
   finished = False
-  #file = open('points.csv', 'w+')
-  #file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n')
-  #file.close()
   """use threading to run each year in parallel"""
-  threads=[Thread(target=save_to_file, args=(q,))]
+  threads=[Thread(target=save_to_file, args=(q,))]  #start the queue saving to file function first
   for year in range(1950,date.today().year+1):
-    threads.append(Thread(target=year_loop, args=(year,)))
-  #threads.insert(0,Thread(target=save_to_file, args=(q,)))
+      threads.append(Thread(target=year_loop, args=(year,)))
   for thread in threads:
+    i = i+1
     thread.start()
+    if i % 20 == 0:
+      thread.join()
   thread.join()
   finished = True
   threads[0].join()  
+
 def year_loop(year):
   #for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
   total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
@@ -87,7 +89,7 @@ def save_points(driver1,driver2,team,year,round,rName): #save the points to a cs
   #file = open('points.csv', 'a+')
   #file.write(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n") #write the points to the csv file
   #file.close()
-  q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")
+  q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")  #Add the data to the queue
 
 def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
   drivers_data = [[int(driver1_data['fPosition']),int(driver1_data['gPosition']),int(driver1_data['fastPosition']),int(driver2_data['fPosition'])],
@@ -129,8 +131,54 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
     driver_points.append(points)
   return {'constructor':team_points,'driver1':driver_points[0],'driver2':driver_points[1]}
 
+def split_driver_points():
+  data = open('raw_points.csv','r').readlines()[1:]
+  teams = {}
+  drivers = {}
+  for line in data:
+    """Convert the file data back into useful variables"""
+    line = line.split(',')
+    team = line[3]
+    team_points = line[4]
+    driver1 = line[5]
+    driver1_points = line[6]
+    driver2 = line[7]
+    driver2_points = line[8]
+    """take all points for each driver and append them to a list in a dictionary for that driver"""
+    if driver1 in drivers:
+      drivers[driver1].append(int(driver1_points))
+    else:
+      drivers[driver1] = [int(driver1_points)]
+    if driver2 in drivers:
+      drivers[driver2].append(int(driver2_points))
+    else:
+      drivers[driver2] = [int(driver2_points)]
+    if team in teams:
+      teams[team].append(int(team_points))
+    else:
+      teams[team] = [int(team_points)]
+    """Add the points in the list together and replace the list with a total"""
+  for team in teams:
+    teams[team]=sum(teams[team])
+  for driver in drivers:
+    drivers[driver]=sum(drivers[driver])
+  """Sort each dictionary so its easier to read"""
+  drivers_sorted=dict(sorted(drivers.items(),key= lambda x:x[1]))
+  teams_sorted=dict(sorted(teams.items(),key= lambda x:x[1]))
+  """save the points to a json file"""
+  save_final_points(drivers_sorted,'driver_points.json')
+  save_final_points(teams_sorted,'team_points.json')
+  print(teams_sorted)
+  print(drivers_sorted)
+
+def save_final_points(points,file):
+  file = open(file,'w+')
+  file.write(str(points).replace("'",'"'))
+  file.close
+
 import time
 get_drivers()
 start = time.time()
 get_race_data()
 print(f"Runtime of the program is {time.time() - start}")
+split_driver_points()

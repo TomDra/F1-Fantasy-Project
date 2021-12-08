@@ -13,9 +13,9 @@ class points():
     import points_recorder
     import requests
     web_server = 'http:http://ergast.com/api/f1'
-    get_race_data()
-  def driver_list(self):
-    start()
+    #get_race_data()
+  #def driver_list(self):
+    #start()
     
 
 points()
