@@ -42,7 +42,7 @@ def get_race_data():
   for thread in threads:
     i = i+1
     thread.start()
-    if i % 20 == 0:
+    if i % 20 == 0: #After 10 threads wait for the last to be finished
       thread.join()
   thread.join()
   finished = True
@@ -86,9 +86,10 @@ def assign_driver_points(rData): #use race data to assign points to the driver
   except KeyError as a:print(a)
 
 def save_points(driver1,driver2,team,year,round,rName): #save the points to a csv file
-  #file = open('points.csv', 'a+')
-  #file.write(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n") #write the points to the csv file
-  #file.close()
+  if int(year) == date.today().year:
+    team[1] = int(team[1])*10
+    driver1[1] = int(driver1[1])*10
+    driver2[2] = int(driver2[2])*10
   q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")  #Add the data to the queue
 
 def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
@@ -145,18 +146,13 @@ def split_driver_points():
     driver2 = line[7]
     driver2_points = line[8]
     """take all points for each driver and append them to a list in a dictionary for that driver"""
-    if driver1 in drivers:
-      drivers[driver1].append(int(driver1_points))
-    else:
-      drivers[driver1] = [int(driver1_points)]
-    if driver2 in drivers:
-      drivers[driver2].append(int(driver2_points))
-    else:
-      drivers[driver2] = [int(driver2_points)]
-    if team in teams:
-      teams[team].append(int(team_points))
-    else:
-      teams[team] = [int(team_points)]
+    variable_set = [[driver1,driver1_points,drivers],[driver2,driver2_points,drivers],[team,team_points,teams]]
+    for driver in variable_set:
+      if driver[0] in driver[2]:
+        driver[2][driver[0]].append(int(driver[1]))
+      else:
+        driver[2][driver[0]] = [int(driver[1])]
+
     """Add the points in the list together and replace the list with a total"""
   for team in teams:
     teams[team]=sum(teams[team])
