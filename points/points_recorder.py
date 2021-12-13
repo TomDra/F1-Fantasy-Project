@@ -3,12 +3,14 @@ import ast
 from threading import Thread
 import queue
 from datetime import date
+global directory
+directory = 'points/'
 
 def get_drivers():
   data = requests.get('http://ergast.com/api/f1/drivers.json?limit=1900&offset=30')
   drivers = ast.literal_eval(data.content.decode())['MRData']['DriverTable']['Drivers']
   detail_driver_list = []
-  file = open('drivers.txt', 'w+')
+  file = open(f'{directory}drivers.txt', 'w+')
   for driver in drivers:
     try:
       driver_id = driver['driverId']
@@ -22,7 +24,7 @@ def get_drivers():
   file.write(str(detail_driver_list))
 
 def save_to_file(queue):
-  file = open('raw_points.csv', 'w+')
+  file = open(f'{directory}raw_points.csv', 'w+')
   file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n') #Write titles of data
   while finished != True or queue.empty() != True:
     print(queue.qsize())
@@ -97,7 +99,7 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
   [int(driver2_data['fPosition']),int(driver2_data['gPosition']),int(driver2_data['fastPosition']),int(driver1_data['fPosition'])]] #Creates a list so that all the data can be inputed into the loop
   driver_points = []
   team_points = 0
-  from point_distribution import assign_points
+  from points import point_distribution as pd
   for i in range(0,2):  #loop twice to get both drivers points
     fPos = drivers_data[i][0] #Extract all data from the list
     gPos = drivers_data[i][1]
@@ -106,34 +108,34 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
     points=0
     """Race Points"""
     try: 
-      points = points + assign_points['DriverPoints']['Race']['Results'][str(fPos)] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
-      team_points = team_points + assign_points['Constructor']['Race']['Results'][str(fPos)] #Add points to team
+      points = points + pd.assign_points['DriverPoints']['Race']['Results'][str(fPos)] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
+      team_points = team_points + pd.assign_points['Constructor']['Race']['Results'][str(fPos)] #Add points to team
     except KeyError: points = 0
-    points = points + ((int(gPos) - int(fPos))* assign_points['DriverPoints']['Race']['PGFG']) #add points to driver for position gained from grid
-    team_points = team_points + ((int(gPos) - int(fPos)) * assign_points['Constructor']['Race']['PGFG'])
+    points = points + ((int(gPos) - int(fPos))* pd.assign_points['DriverPoints']['Race']['PGFG']) #add points to driver for position gained from grid
+    team_points = team_points + ((int(gPos) - int(fPos)) * pd.assign_points['Constructor']['Race']['PGFG'])
     if fLapPos == 1: 
-      points = points + assign_points['DriverPoints']['Race']['fLap']  #Add points to driver for achiving fastest lap
-      team_points = team_points + assign_points['Constructor']['Race']['fLap']  #Add points to team for fastest lap  
-    if fPos > teammatePos: points = points + assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
-    elif fPos < teammatePos: points = points + assign_points['DriverPoints']['Race']['FBT'] #add points for finishing below teammate
-    try:team_points = team_points + assign_points['Constructor']['Race']['Results'][str(fPos)]  #Add points to team for result in race
+      points = points + pd.assign_points['DriverPoints']['Race']['fLap']  #Add points to driver for achiving fastest lap
+      team_points = team_points + pd.assign_points['Constructor']['Race']['fLap']  #Add points to team for fastest lap  
+    if fPos > teammatePos: points = points + pd.assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
+    elif fPos < teammatePos: points = points + pd.assign_points['DriverPoints']['Race']['FBT'] #add points for finishing below teammate
+    try:team_points = team_points + pd.assign_points['Constructor']['Race']['Results'][str(fPos)]  #Add points to team for result in race
     except KeyError: pass
     """Quallifying Points"""
     try: 
-      points = points + assign_points['DriverPoints']['Qualifying']['Results'][gPos]  #Add driver points for qually pos
-      team_points = team_points + assign_points['Constructor']['Qualifying']['Results'][gPos] #Add team points for qually pos
+      points = points + pd.assign_points['DriverPoints']['Qualifying']['Results'][gPos]  #Add driver points for qually pos
+      team_points = team_points + pd.assign_points['Constructor']['Qualifying']['Results'][gPos] #Add team points for qually pos
     except KeyError: pass
     if gPos <= 15:
-      points = points + assign_points['DriverPoints']['Qualifying']['RQ2']  #Add points for qually positions above 15
-      team_points = team_points + assign_points['Constructor']['Qualifying']['RQ2'] #Add team points for qually positions above 15
+      points = points + pd.assign_points['DriverPoints']['Qualifying']['RQ2']  #Add points for qually positions above 15
+      team_points = team_points + pd.assign_points['Constructor']['Qualifying']['RQ2'] #Add team points for qually positions above 15
     if gPos <= 10:
-      points = points + assign_points['DriverPoints']['Qualifying']['RQ3']  #Add points for qually positions above 10
-      team_points = team_points + assign_points['Constructor']['Qualifying']['RQ3'] #Add team points for qually positions above 10
+      points = points + pd.assign_points['DriverPoints']['Qualifying']['RQ3']  #Add points for qually positions above 10
+      team_points = team_points + pd.assign_points['Constructor']['Qualifying']['RQ3'] #Add team points for qually positions above 10
     driver_points.append(points)
   return {'constructor':team_points,'driver1':driver_points[0],'driver2':driver_points[1]}
 
 def split_driver_points():
-  data = open('raw_points.csv','r').readlines()[1:]
+  data = open(f'{directory}raw_points.csv','r').readlines()[1:]
   teams = {}
   drivers = {}
   for line in data:
@@ -168,13 +170,14 @@ def split_driver_points():
   print(drivers_sorted)
 
 def save_final_points(points,file):
-  file = open(file,'w+')
+  file = open(directory+file,'w+')
   file.write(str(points).replace("'",'"'))
   file.close
 
-import time
-get_drivers()
-start = time.time()
-get_race_data()
-print(f"Runtime of the program is {time.time() - start}")
-split_driver_points()
+if __name__ == '__main__':
+  import time
+  get_drivers()
+  start = time.time()
+  get_race_data()
+  print(f"Runtime of the program is {time.time() - start}")
+  split_driver_points()
