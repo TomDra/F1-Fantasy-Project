@@ -10,7 +10,7 @@ class server():
 
 class points():
   def __init__(self):
-    import points_recorder
+    from points import points_recorder
     import requests
     web_server = 'http:http://ergast.com/api/f1'
     #get_race_data()
