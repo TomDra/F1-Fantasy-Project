@@ -8,11 +8,17 @@ class server():
       socket.AF_INET, socket.SOCK_STREAM) 
 
 
+
+
 class points():
   def __init__(self):
     from points import points_recorder as pr
     pr.get_drivers()
     pr.get_race_data()
+    pr.split_driver_points()
+    #get_race_data()
+  #def driver_list(self):
+    #start()
     
 
 points()

@@ -1,10 +1,11 @@
 import requests #import needed modules
 import ast
-from threading import Thread
+from threading import Thread, Lock
 import queue
 from datetime import date
 global directory
 directory = 'points/'
+lock = Lock()
 
 def get_drivers():
   data = requests.get('http://ergast.com/api/f1/drivers.json?limit=1900&offset=30')
@@ -38,24 +39,23 @@ def get_race_data():
   q = queue.Queue()
   finished = False
   """use threading to run each year in parallel"""
-  threads=[Thread(target=save_to_file, args=(q,))]  #start the queue saving to file function first
+  threads=[]
   for year in range(1950,date.today().year+1):
       threads.append(Thread(target=year_loop, args=(year,)))
   for thread in threads:
-    i = i+1
     thread.start()
-    if i % 20 == 0: #After 10 threads wait for the last to be finished
-      thread.join()
-  thread.join()
+  for thread in threads:  #End all threads
+    print(f"thread ending {thread}")
+    thread.join()
   finished = True
-  threads[0].join()  
+  save_to_file(q) #save the queue to a file
+
 
 def year_loop(year):
   #for year in range(1950,date.today().year+1):  #Cycle through all years of f1 from 1950 to the current year
   total_races_in_year = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}.json').content.decode())['MRData']['total'] #Get all rounds in the year
   for race in range(1,int(total_races_in_year)+1):  #Cycle through all the rounds in the year
     race_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/results.json').content.decode())  #Get the race data
-    #quali_data = ast.literal_eval(requests.get(f'http://ergast.com/api/f1/{year}/{race}/qualifying.json').content.decode())  #Get the quali data
     try:
       assign_driver_points(race_data) #,quali_data)
     except IndexError as a:
@@ -92,7 +92,9 @@ def save_points(driver1,driver2,team,year,round,rName): #save the points to a cs
     team[1] = int(team[1])*10
     driver1[1] = int(driver1[1])*10
     driver2[2] = int(driver2[2])*10
+  lock.acquire()
   q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")  #Add the data to the queue
+  lock.release()
 
 def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
   drivers_data = [[int(driver1_data['fPosition']),int(driver1_data['gPosition']),int(driver1_data['fastPosition']),int(driver2_data['fPosition'])],
@@ -110,21 +112,26 @@ def get_points(driver1_data,driver2_data): #Get all data required to calculate p
     try: 
       points = points + pd.assign_points['DriverPoints']['Race']['Results'][str(fPos)] #add points to driver for finishing finishing top 10 or minus 25 for not finishing
       team_points = team_points + pd.assign_points['Constructor']['Race']['Results'][str(fPos)] #Add points to team
-    except KeyError: points = 0
+    except KeyError: 
+      points = 0
     points = points + ((int(gPos) - int(fPos))* pd.assign_points['DriverPoints']['Race']['PGFG']) #add points to driver for position gained from grid
     team_points = team_points + ((int(gPos) - int(fPos)) * pd.assign_points['Constructor']['Race']['PGFG'])
     if fLapPos == 1: 
       points = points + pd.assign_points['DriverPoints']['Race']['fLap']  #Add points to driver for achiving fastest lap
       team_points = team_points + pd.assign_points['Constructor']['Race']['fLap']  #Add points to team for fastest lap  
-    if fPos > teammatePos: points = points + pd.assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
-    elif fPos < teammatePos: points = points + pd.assign_points['DriverPoints']['Race']['FBT'] #add points for finishing below teammate
+    if fPos > teammatePos: 
+      points = points + pd.assign_points['DriverPoints']['Race']['FAT'] #add points for finishing above teammate
+    elif fPos < teammatePos: 
+      points = points + pd.assign_points['DriverPoints']['Race']['FBT'] #add points for finishing below teammate
     try:team_points = team_points + pd.assign_points['Constructor']['Race']['Results'][str(fPos)]  #Add points to team for result in race
-    except KeyError: pass
+    except KeyError: 
+      pass
     """Quallifying Points"""
     try: 
       points = points + pd.assign_points['DriverPoints']['Qualifying']['Results'][gPos]  #Add driver points for qually pos
       team_points = team_points + pd.assign_points['Constructor']['Qualifying']['Results'][gPos] #Add team points for qually pos
-    except KeyError: pass
+    except KeyError: 
+      pass
     if gPos <= 15:
       points = points + pd.assign_points['DriverPoints']['Qualifying']['RQ2']  #Add points for qually positions above 15
       team_points = team_points + pd.assign_points['Constructor']['Qualifying']['RQ2'] #Add team points for qually positions above 15
