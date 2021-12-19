@@ -28,7 +28,6 @@ def save_to_file(queue):
   file = open(f'{directory}raw_points.csv', 'w+')
   file.write('year,round,race name,team,team points,driver1,driver1 points,driver2,driver2 points\n') #Write titles of data
   while finished != True or queue.empty() != True:
-    print(queue.qsize())
     """Loop until queue is empty and finished == True"""
     file.write(queue.get())
   file.close()
@@ -59,7 +58,7 @@ def year_loop(year):
     try:
       assign_driver_points(race_data) #,quali_data)
     except IndexError as a:
-      print(a)
+      print(f"test1 {a} {year}")
 
 def assign_driver_points(rData): #use race data to assign points to the driver
   team_dict = {}
@@ -85,13 +84,14 @@ def assign_driver_points(rData): #use race data to assign points to the driver
       points = get_points(driver1,driver2)  #get the driver and constructors points
       #print(team,points)
       save_points([driver1['driver'],points['driver1']],[driver2['driver'],points['driver2']],[team,points['constructor']],year,round,rName)
-  except KeyError as a:print(a)
+  except KeyError as a:
+    print(a)
 
 def save_points(driver1,driver2,team,year,round,rName): #save the points to a csv file
   if int(year) == date.today().year:
     team[1] = int(team[1])*10
     driver1[1] = int(driver1[1])*10
-    driver2[2] = int(driver2[2])*10
+    driver2[1] = int(driver2[1])*10
   lock.acquire()
   q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")  #Add the data to the queue
   lock.release()
@@ -161,7 +161,6 @@ def split_driver_points():
         driver[2][driver[0]].append(int(driver[1]))
       else:
         driver[2][driver[0]] = [int(driver[1])]
-
     """Add the points in the list together and replace the list with a total"""
   for team in teams:
     teams[team]=sum(teams[team])
@@ -188,3 +187,7 @@ if __name__ == '__main__':
   get_race_data()
   print(f"Runtime of the program is {time.time() - start}")
   split_driver_points()
+
+
+#https://ergast.com/api/f1/constructorstandings/1.json?limit=9999&offset=30
+#https://ergast.com/api/f1/driverstandings/1.json?limit=9999&offset=30
