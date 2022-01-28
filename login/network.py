@@ -74,9 +74,8 @@ def handle_client_login(client_socket):
   return False
 
 def handle_client(client_socket):
-  while True:
-    if handle_client_login(client_socket):
-      break
+  if handle_client_login(client_socket) == True:
+    send_team_data(client_socket)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('localhost', 9999))
