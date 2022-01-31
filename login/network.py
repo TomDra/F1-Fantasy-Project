@@ -3,7 +3,7 @@ from argon2 import PasswordHasher
 import socket
 import threading
 ph = PasswordHasher()
-sqliteConnection = sqlite3.connect('logins.db', check_same_thread=False)
+sqliteConnection = sqlite3.connect('login/logins.db', check_same_thread=False)
 cursor = sqliteConnection.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS logins (userID int NOT NULL,username string,hashpass string, UNIQUE(userID), PRIMARY KEY (userID));")
 #cursor.execute(f'INSERT INTO logins VALUES (1,"test", "{ph.hash("teststring")}");')
@@ -67,28 +67,30 @@ def handle_client_login(client_socket):
     result = login(request[1], request[2])
     client_socket.send(str(result).encode())
     if result == True:
-      return True
+      return [True,cursor.execute(f'SELECT userID WHERE username = "{request[1]}"')]
   else:
     client_socket.send(b'Invalid Request')
   client_socket.close()
   return False
 
-def handle_client(client_socket):
-  if handle_client_login(client_socket) == True:
-    send_team_data(client_socket)
+#def handle_client(client_socket):
+#  if handle_client_login(client_socket) == True:
+#    pass
+    #send_team_data(client_socket)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('localhost', 9999))
-s.listen(5)
-"""create a thread for each client"""
-while True:
-  client_socket, address = s.accept()
-  print(f'Connection from {address} has been established')
-  client = threading.Thread(target=handle_client, args=(client_socket,))
-  client.start()
-  print(f'Thread for {address} has been created')
-  client.join()
-  sqliteConnection.commit()
+def main():
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind(('localhost', 9999))
+  s.listen(5)
+  """create a thread for each client"""
+  while True:
+    client_socket, address = s.accept()
+    print(f'Connection from {address} has been established')
+    client = threading.Thread(target=handle_client, args=(client_socket,))
+    client.start()
+    print(f'Thread for {address} has been created')
+    client.join()
+    sqliteConnection.commit()
 
 
 

@@ -6,7 +6,7 @@ def login(username, password):
     s.connect(('localhost', 9999))
     s.send(f'login-~-{username}-~-{password}'.encode())
     accept = s.recv(1024).decode()
-    return accept
+    return [s,accept]
 
 def register(username, password):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,4 +15,6 @@ def register(username, password):
     accept = s.recv(1024).decode()
     return accept
 
-print(login('test', 'teststring99'))
+
+if (login('test', 'teststring99') := client)[1] == True:
+  data = client[0].recv(1024).decode()

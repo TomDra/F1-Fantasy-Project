@@ -44,7 +44,6 @@ def get_race_data():
   for thread in threads:
     thread.start()
   for thread in threads:  #End all threads
-    print(f"thread ending {thread}")
     thread.join()
   finished = True
   save_to_file(q) #save the queue to a file
@@ -58,14 +57,13 @@ def year_loop(year):
     try:
       assign_driver_points(race_data) #,quali_data)
     except IndexError as a:
-      print(f"test1 {a} {year}")
+      print(f"{a} {year}")
 
 def assign_driver_points(rData): #use race data to assign points to the driver
   team_dict = {}
   year = rData['MRData']['RaceTable']['Races'][0]['season'] #Get race year
   round = rData['MRData']['RaceTable']['Races'][0]['round'] #Get race number
   rName = rData['MRData']['RaceTable']['Races'][0]['raceName']  #Get race name
-  #print(len(rData['MRData']['RaceTable']['Races'][0]['Results']))
   try:
     for driver in rData['MRData']['RaceTable']['Races'][0]['Results']:
       constructor = driver['Constructor']['name'] #Get drivers team
@@ -82,7 +80,6 @@ def assign_driver_points(rData): #use race data to assign points to the driver
       try: driver2 = team_dict[team][1]
       except IndexError: driver2 = {'driver': 'n/a', 'fastPosition': 22, 'gPosition': '22', 'fPosition': '22'}  #If no second driver exists, use filler data
       points = get_points(driver1,driver2)  #get the driver and constructors points
-      #print(team,points)
       save_points([driver1['driver'],points['driver1']],[driver2['driver'],points['driver2']],[team,points['constructor']],year,round,rName)
   except KeyError as a:
     print(a)
@@ -172,8 +169,7 @@ def split_driver_points():
   """save the points to a json file"""
   save_final_points(drivers_sorted,'driver_points.json')
   save_final_points(teams_sorted,'team_points.json')
-  print(teams_sorted)
-  print(drivers_sorted)
+  print('Team and Driver points Compleated')
 
 def save_final_points(points,file):
   file = open(directory+file,'w+')
