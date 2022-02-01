@@ -16,5 +16,5 @@ def register(username, password):
     return accept
 
 
-if (login('test', 'teststring99') := client)[1] == True:
+if (client := (login('test', 'teststring99'))[1]) == True:
   data = client[0].recv(1024).decode()

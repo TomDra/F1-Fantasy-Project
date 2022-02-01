@@ -13,7 +13,7 @@ class Account:
   def __init__(self,username):
     self.username = username
     try:
-      if str(cursor.execute(f'SELECT username FROM logins WHERE username="{self.username}"').fetchall()[0]).split("'")[1] != None:
+      if str(cursor.execute(f'SELECT username FROM logins WHERE username="{self.username}"').fetchall()[0]).split("'")[1] != None:  # if username exists
         self.account = True
         self.password_hash = str(cursor.execute(f'SELECT hashpass FROM logins WHERE username="{username}"').fetchall()[0]).split("'")[1]
     except IndexError:
@@ -62,6 +62,7 @@ def handle_client_login(client_socket):
   print(request)
   if request[0] == 'register':
     result = register(request[1], request[2])
+    sqliteConnection.commit()
     client_socket.send(str(result).encode())
   elif request[0] == 'login':
     result = login(request[1], request[2])
@@ -70,7 +71,6 @@ def handle_client_login(client_socket):
       return [True,cursor.execute(f'SELECT userID WHERE username = "{request[1]}"')]
   else:
     client_socket.send(b'Invalid Request')
-  client_socket.close()
   return False
 
 #def handle_client(client_socket):
@@ -95,4 +95,4 @@ def main():
 
 
 
-sqliteConnection.close()
+#sqliteConnection.close()

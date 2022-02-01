@@ -24,7 +24,7 @@ def main():
   while True:
     client_socket, address = s.accept()
     print(f'Connection from {address} has been established')
-    client = threading.Thread(target=net.handle_client, args=(client_socket,))
+    client = threading.Thread(target=handle_client, args=(client_socket,))
     client.start()
     print(f'Thread for {address} has been created')
     client.join()
@@ -32,12 +32,15 @@ def main():
 
 def handle_client(client_socket):
   user = net.handle_client_login(client_socket)
-  if user[0] == True:
-    """Get the team and driver data from the database using the userID"""
-    user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}')
-    user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}')
-    data = f'[{user_team},{user_drivers}]'
-    client_socket.send(data.encode()) # send the data to the client
+  try:
+    if user[0] == True:
+      """Get the team and driver data from the database using the userID"""
+      user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}')
+      user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}')
+      data = f'[{user_team},{user_drivers}]'
+      client_socket.send(data.encode()) # send the data to the client
+  except TypeError:
+    pass
 
 main()
 
