@@ -2,10 +2,12 @@ import sqlite3
 from argon2 import PasswordHasher
 import socket
 import threading
+from main import save_team
+
 ph = PasswordHasher()
 sqliteConnection = sqlite3.connect('login/logins.db', check_same_thread=False)
 cursor = sqliteConnection.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS logins (userID int NOT NULL,username string,hashpass string, UNIQUE(userID), PRIMARY KEY (userID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS logins (userID ,username string,hashpass string, UNIQUE(userID), PRIMARY KEY (userID));")
 #cursor.execute(f'INSERT INTO logins VALUES (1,"test", "{ph.hash("teststring")}");')
 print(cursor.execute("SELECT * FROM logins").fetchall())
 
@@ -33,7 +35,7 @@ class Account:
     id = 0
     while True:
       try:
-        cursor.execute(f'Insert INTO logins VALUES({id},"{self.username}","{password}")')
+        cursor.execute(f'INSERT INTO logins (userID, username, hashpass) VALUES({id},"{self.username}","{password}")')
         break
       except Exception:
         id = id + 1
@@ -68,15 +70,17 @@ def handle_client_login(client_socket):
     result = login(request[1], request[2])
     client_socket.send(str(result).encode())
     if result == True:
-      return [True,cursor.execute(f'SELECT userID WHERE username = "{request[1]}"')]
+      userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
+      return [True,userID]
+  elif request[0] == 'save_team':
+    if login(request[1], request[2]):
+      userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
+      result = save_team(userID, request[3], request[4])
+    client_socket.send(str(result).encode())
   else:
     client_socket.send(b'Invalid Request')
   return False
 
-#def handle_client(client_socket):
-#  if handle_client_login(client_socket) == True:
-#    pass
-    #send_team_data(client_socket)
 
 def main():
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

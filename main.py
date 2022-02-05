@@ -7,19 +7,22 @@ CREATE TABLE IF NOT EXISTS
 teamData (userID int NOT NULL,team string,drivers, UNIQUE(userID), PRIMARY KEY (userID));
 """)  #Creates table in the format [userID,team,drivers]
 
-from points import points_recorder as pr
-pr.get_drivers()
-pr.get_race_data()
-pr.split_driver_points()
+def create_driver_points():
+  from points import points_recorder as pr
+  pr.get_drivers()
+  pr.get_race_data()
+  pr.split_driver_points()
 
 from login import network as net
 import socket
 import threading
+
 def main():
   """Create server connection"""
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.bind(('localhost', 9999))
   s.listen(5)
+  print('Server started')
   """Create a thread for each client"""
   while True:
     client_socket, address = s.accept()
@@ -38,11 +41,21 @@ def handle_client(client_socket):
       user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}')
       user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}')
       data = f'[{user_team},{user_drivers}]'
-      client_socket.send(data.encode()) # send the data to the client
+      client_socket.send(data.encode())  # send the data to the client
   except TypeError:
     pass
 
-main()
+def save_team(userID, team, drivers):
+  """Save the team data to the database"""
+  """IF DATA EXISTS, UPDATE IT"""
+  dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers) VALUES ({userID}, "{team}", "{drivers}")')
+  return True
+
+
+
+if __name__ == '__main__':
+  create_driver_points()
+  main()
 
   
 
