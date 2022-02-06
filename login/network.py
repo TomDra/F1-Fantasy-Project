@@ -64,18 +64,18 @@ def handle_client_login(client_socket):
   print(request)
   if request[0] == 'register':
     result = register(request[1], request[2])
-    sqliteConnection.commit()
+    sqliteConnection.commit()   # commit changes to database
     client_socket.send(str(result).encode())
   elif request[0] == 'login':
     result = login(request[1], request[2])
     client_socket.send(str(result).encode())
-    if result == True:
+    if result == True:  # if login is successful
       userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
       return [True,userID]
   elif request[0] == 'save_team':
-    if login(request[1], request[2]):
+    if login(request[1], request[2]):  # if login is successful
       userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
-      result = save_team(userID, request[3], request[4])
+      result = save_team(userID, request[3], request[4]) # save team
     client_socket.send(str(result).encode())
   else:
     client_socket.send(b'Invalid Request')

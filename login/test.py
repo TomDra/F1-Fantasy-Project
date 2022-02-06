@@ -25,12 +25,10 @@ def send_teamData(username, password,team, drivers):
     return accept
 
 
-print(register('test3','teststring99'))
-
-
+print(register('test','test'))
 print(send_teamData('test','test','test','test'))
 
-if (client := (login('test3', 'teststring99'))[1]) == True:
+if (client := (login('test555', 'teststring99')))[1] == True:
     data = client[0].recv(1024).decode()
     print(data)
 else:
