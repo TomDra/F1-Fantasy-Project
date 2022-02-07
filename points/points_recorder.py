@@ -34,7 +34,6 @@ def save_to_file(queue):
 
 def get_race_data():
   global q,finished
-  i=1
   q = queue.Queue()
   finished = False
   """use threading to run each year in parallel"""

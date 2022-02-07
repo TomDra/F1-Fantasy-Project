@@ -2,7 +2,7 @@ import sqlite3
 from argon2 import PasswordHasher
 import socket
 import threading
-from main import save_team
+from main import save_team, return_team
 
 ph = PasswordHasher()
 sqliteConnection = sqlite3.connect('login/logins.db', check_same_thread=False)
@@ -63,19 +63,30 @@ def handle_client_login(client_socket):
   request = request.split('-~-')
   print(request)
   if request[0] == 'register':
+    """request in form [register, username, password]"""
     result = register(request[1], request[2])
     sqliteConnection.commit()   # commit changes to database
     client_socket.send(str(result).encode())
   elif request[0] == 'login':
+    """request in form [login, username, password]"""
     result = login(request[1], request[2])
     client_socket.send(str(result).encode())
     if result == True:  # if login is successful
       userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
       return [True,userID]
   elif request[0] == 'save_team':
+    """request in form [save_team, username, password, team_data, driver_data]"""
     if login(request[1], request[2]):  # if login is successful
       userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
       result = save_team(userID, request[3], request[4]) # save team
+    client_socket.send(str(result).encode())
+  elif request[0] == 'return_team':
+    """request in form [return_team, username, password]"""
+    if (login_result := login(request[1], request[2])):  # if login is successful
+      userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
+      result = return_team(userID) # return team
+    else:
+      result = login_result
     client_socket.send(str(result).encode())
   else:
     client_socket.send(b'Invalid Request')

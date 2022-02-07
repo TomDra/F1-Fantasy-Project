@@ -44,19 +44,28 @@ def handle_client(client_socket):
   try:
     if user[0]: # if user is logged in
       """Get the team and driver data from the database using the userID"""
-      user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}')
-      user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}')
-      data = f'[{user_team},{user_drivers}]'
-      client_socket.send(data.encode())  # send the data to the client
+      #user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}').fetchall()
+      #user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}').fetchall()
+      #data = f'[{user_team},{user_drivers}]'
+      data = return_team(user[1])
+      client_socket.send(str(data).encode())  # send the data to the client
   except TypeError:
     pass
 
 
-def save_team(userID, team, drivers):
+def save_team(userID, constructor, drivers):
   """Save the team data to the database"""
   """IF DATA EXISTS, UPDATE IT"""
-  dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers) VALUES ({userID}, "{team}", "{drivers}")')
+  dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers) VALUES ({userID}, "{constructor}", "{drivers}")')
   return True
+
+
+def return_team(userID):
+  """Return the team data from the database"""
+  """IF DATA EXISTS, RETURN IT"""
+  data = dataCursor.execute(f'SELECT team, drivers FROM teamData WHERE userID = {userID}').fetchall()
+  print(data)
+  return data
 
 
 if __name__ == '__main__':
