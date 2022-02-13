@@ -17,6 +17,7 @@ class Ui(QtWidgets.QMainWindow):
         self.login_username = self.findChild(QtWidgets.QLineEdit, 'login_username')
         self.login_password = self.findChild(QtWidgets.QLineEdit, 'login_password')
         self.login_errorbox = self.findChild(QtWidgets.QLabel, 'login_errorbox')
+        self.login_errorbox.setStyleSheet('color: red')
 
         """Register Buttons"""
         self.register_button = self.findChild(QtWidgets.QPushButton, 'register_button')
@@ -24,10 +25,14 @@ class Ui(QtWidgets.QMainWindow):
         self.register_username = self.findChild(QtWidgets.QLineEdit, 'register_username')
         self.register_password = self.findChild(QtWidgets.QLineEdit, 'register_password')
         self.register_errorbox = self.findChild(QtWidgets.QLabel, 'register_errorbox')
-
+        self.register_errorbox.setStyleSheet('color: red')
 
     def login_button_pressed(self):
-        s = connect_to_server()
+        try:
+            s = connect_to_server()
+        except Exception:
+            self.login_errorbox.setText('Could not connect to server')
+            return
         username = self.login_username.text()
         password = self.login_password.text()
         print(f'Login pressed: Username - {username}, Password - {password}')
@@ -42,7 +47,11 @@ class Ui(QtWidgets.QMainWindow):
         s.close()
 
     def register_button_pressed(self):
-        s = connect_to_server()
+        try:
+            s = connect_to_server()
+        except Exception:
+            self.register_errorbox.setText('Could not connect to server')
+            return
         username = self.register_username.text()
         password = self.register_password.text()
         print(f'Register pressed: Username - {username}, Password - {password}')
