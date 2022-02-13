@@ -5,6 +5,7 @@ f = open('connect.private', 'r')    # Open the file containing the ip and port
 socket_connect = ast.literal_eval(f.read().replace('\n', ''))    # Read the file and convert it to a dictionary
 f.close()
 
+
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super(Ui, self).__init__() # Call the inherited classes __init__ method
@@ -42,8 +43,9 @@ class Ui(QtWidgets.QMainWindow):
         if result == 'True':
             print('Login successful')
             self.close()  # If Login successful close the login window
+        elif ast.literal_eval(result)[0] == False:
+            self.login_errorbox.setText('Username or password incorrect')
         else:
-            print('Login failed')
             self.login_errorbox.setText('Login failed')  # If Login failed show error message
         s.close()
 
@@ -59,11 +61,15 @@ class Ui(QtWidgets.QMainWindow):
         password = self.register_password.text()    # Get the password from the register_password widget
         print(f'Register pressed: Username - {username}, Password - {password}')
         s.send(f'register-~-{username}-~-{password}'.encode())
-        if str(s.recv(1024)) == 'True':  # If the register is True
+        result = s.recv(1024).decode()  # Get the result from the server
+        print(result)
+        if str(result) == 'True':  # If the register is True
             print('Register successful')
-            self.close()
+            self.register_errorbox.setStyleSheet('color: green')  # Set the errorbox colour to green
+            self.register_errorbox.setText('Register successful')  # Show the register successful message
+        elif ast.literal_eval(result)[0] == False:
+            self.register_errorbox.setText('Username already exists')  # If the username already exists
         else:
-            print('Register failed')
             self.register_errorbox.setText('Register failed')   # If register is False, show error message
 
 def connect_to_server():
@@ -72,7 +78,7 @@ def connect_to_server():
     return s
 
 
-
-app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
-window = Ui() # Create an instance of our class
-app.exec_() # Start the application
+def login():
+    app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
+    window = Ui() # Create an instance of our class
+    app.exec_() # Start the application
