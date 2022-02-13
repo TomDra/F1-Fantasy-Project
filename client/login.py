@@ -8,7 +8,7 @@ f.close()
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super(Ui, self).__init__() # Call the inherited classes __init__ method
-        uic.loadUi('login.ui', self) # Load the .ui file
+        uic.loadUi('gui_files/login.ui', self) # Load the .ui file
         self.show() # Show the GUI
 
         """Find all Login Widgets"""
