@@ -1,4 +1,6 @@
 import sqlite3
+import time
+
 from argon2 import PasswordHasher
 import socket
 import threading
@@ -36,6 +38,7 @@ class Account:
     while True:
       try:
         cursor.execute(f'INSERT INTO logins (userID, username, hashpass) VALUES({id},"{self.username}","{password}")')
+        print('Account Created')
         break
       except Exception:
         id = id + 1
@@ -66,14 +69,15 @@ def handle_client_login(client_socket):
     """request in form [register, username, password]"""
     result = register(request[1], request[2])
     sqliteConnection.commit()   # commit changes to database
+    print(result)
     client_socket.send(str(result).encode())
   elif request[0] == 'login':
     """request in form [login, username, password]"""
     result = login(request[1], request[2])
-    client_socket.send(str(result).encode())
+    print(result)
+    client_socket.send((str(result)).encode())
     if result == True:  # if login is successful
-      userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
-      return [True,userID]
+      return True
   elif request[0] == 'save_team':
     """request in form [save_team, username, password, team_data, driver_data]"""
     if login(request[1], request[2]):  # if login is successful

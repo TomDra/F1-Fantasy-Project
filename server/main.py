@@ -41,16 +41,6 @@ def main():
 
 def handle_client(client_socket):
   user = net.handle_client_login(client_socket)
-  try:
-    if user[0]: # if user is logged in
-      """Get the team and driver data from the database using the userID"""
-      #user_team = dataCursor.execute(f'SELECT team FROM teamData WHERE userID = {user[1]}').fetchall()
-      #user_drivers = dataCursor.execute(f'SELECT drivers FROM teamData WHERE userID = {user[1]}').fetchall()
-      #data = f'[{user_team},{user_drivers}]'
-      data = return_team(user[1])
-      client_socket.send(str(data).encode())  # send the data to the client
-  except TypeError:
-    pass
 
 
 def save_team(userID, constructor, drivers):
@@ -69,7 +59,7 @@ def return_team(userID):
 
 
 if __name__ == '__main__':
-  #create_driver_points()
+  create_driver_points()
   main()
   sqliteConnection.commit()  # save changes to the database
 

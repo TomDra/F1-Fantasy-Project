@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Personal
+.idea/*
+*.db
+server/points/*.txt
+server/points/*.json
+server/points/*.csv
+
 # Distribution / packaging
 .Python
 build/
