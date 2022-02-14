@@ -58,10 +58,11 @@ def register(username, password):
     user.create_record(ph.hash(password))
     return True
   else:
-    return [False,'Username Occupied']
+    return [False, 'Username Occupied']
 
-"""create a new thread for each client and determine if the client is a new user or returning user so they can login or register"""
+
 def handle_client_login(client_socket):
+  """create a new thread for each client and determine if the client is a new user or returning user so they can login or register"""
   request = client_socket.recv(1024).decode()
   request = request.split('-~-')
   print(request)
@@ -76,7 +77,7 @@ def handle_client_login(client_socket):
     result = login(request[1], request[2])
     print(result)
     client_socket.send((str(result)).encode())
-    if result == True:  # if login is successful
+    if result:  # if login is successful
       return True
   elif request[0] == 'save_team':
     """request in form [save_team, username, password, team_data, driver_data]"""

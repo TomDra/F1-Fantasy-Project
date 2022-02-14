@@ -1,16 +1,14 @@
+import ast
+import sys
+from client import functions as f
 from PyQt5 import QtWidgets, uic
-import sys, socket, ast
-
-f = open('connect.private', 'r')    # Open the file containing the ip and port
-socket_connect = ast.literal_eval(f.read().replace('\n', ''))    # Read the file and convert it to a dictionary
-f.close()
-
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
-        super(Ui, self).__init__() # Call the inherited classes __init__ method
-        uic.loadUi('gui_files/login.ui', self) # Load the .ui file
-        self.show() # Show the GUI
+        super(Ui, self).__init__()  # Call the inherited classes __init__ method
+        uic.loadUi('gui_files/login.ui', self)  # Load the .ui file
+        self.show()  # Show the GUI
+        self.logged_in = False  # Set logged_in to False
 
         """Find all Login Widgets"""
         self.login_button = self.findChild(QtWidgets.QPushButton, 'login_button')
@@ -31,7 +29,7 @@ class Ui(QtWidgets.QMainWindow):
     def login_button_pressed(self):
         """Check if server is online"""
         try:
-            s = connect_to_server()
+            s = f.connect_to_server()
         except Exception:
             self.login_errorbox.setText('Could not connect to server')
             return
@@ -42,8 +40,9 @@ class Ui(QtWidgets.QMainWindow):
         result = str(s.recv(1024).decode())  # Get the result from the server
         if result == 'True':
             print('Login successful')
+            self.logged_in = True
             self.close()  # If Login successful close the login window
-        elif ast.literal_eval(result)[0] == False:
+        elif not ast.literal_eval(result)[0]:
             self.login_errorbox.setText('Username or password incorrect')
         else:
             self.login_errorbox.setText('Login failed')  # If Login failed show error message
@@ -52,7 +51,7 @@ class Ui(QtWidgets.QMainWindow):
     def register_button_pressed(self):
         """Check if server is online"""
         try:
-            s = connect_to_server()
+            s = f.connect_to_server()
         except Exception:
             self.register_errorbox.setText('Could not connect to server')
             return
@@ -67,18 +66,17 @@ class Ui(QtWidgets.QMainWindow):
             print('Register successful')
             self.register_errorbox.setStyleSheet('color: green')  # Set the errorbox colour to green
             self.register_errorbox.setText('Register successful')  # Show the register successful message
-        elif ast.literal_eval(result)[0] == False:
+        elif not ast.literal_eval(result)[0]:
             self.register_errorbox.setText('Username already exists')  # If the username already exists
         else:
             self.register_errorbox.setText('Register failed')   # If register is False, show error message
 
-def connect_to_server():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((socket_connect[0], int(socket_connect[1])))
-    return s
-
+    def get_logged_in(self):
+        """Get the logged_in value"""
+        return self.logged_in
 
 def login():
     app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
     window = Ui() # Create an instance of our class
     app.exec_() # Start the application
+    return window.get_logged_in() # Return the logged_in value

@@ -210,9 +210,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="sign_out">
+         <widget class="QPushButton" name="exit">
           <property name="text">
-           <string>Sign Out</string>
+           <string>Exit</string>
           </property>
          </widget>
         </item>
