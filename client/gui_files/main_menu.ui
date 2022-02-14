@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>F1Fantasy</class>
+ <widget class="QMainWindow" name="F1Fantasy">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
+    <width>615</width>
     <height>368</height>
    </rect>
   </property>
@@ -81,7 +81,7 @@
     <bool>false</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
+    <item row="1" column="2">
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="sizeConstraint">
        <enum>QLayout::SetNoConstraint</enum>
@@ -163,6 +163,9 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
@@ -172,42 +175,42 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="recent_driver_changes">
           <property name="text">
            <string>Recent Driver Changes</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="explain_htp">
           <property name="text">
            <string>Explanation on how to play</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_5">
+         <widget class="QPushButton" name="how_vac">
           <property name="text">
            <string>How values are calculated</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="change_team">
+         <widget class="QPushButton" name="edit_team">
           <property name="text">
            <string>Edit Team</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="refresh">
           <property name="text">
            <string>Refresh Data</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="sign_out">
           <property name="text">
            <string>Sign Out</string>
           </property>
@@ -240,6 +243,9 @@
           <property name="autoFillBackground">
            <bool>true</bool>
           </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -248,10 +254,38 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>150</width>
+             <width>190</width>
              <height>273</height>
             </rect>
            </property>
+           <widget class="QLabel" name="label">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>220</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Chat:</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </item>
@@ -263,8 +297,14 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">placeholder=&quot;Type Message here&quot;</string>
+          </property>
           <property name="text">
-           <string>Send Chat Message</string>
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Type Message Here</string>
           </property>
          </widget>
         </item>
@@ -279,7 +319,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>495</width>
+     <width>615</width>
      <height>22</height>
     </rect>
    </property>
