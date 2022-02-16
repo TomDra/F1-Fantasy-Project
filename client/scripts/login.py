@@ -58,6 +58,12 @@ class Ui(QtWidgets.QMainWindow):
 
         username = self.register_username.text()    # Get the username from the register_username widget
         password = self.register_password.text()    # Get the password from the register_password widget
+
+
+        if '-~-' in (username or password):
+            self.register_errorbox.setText('-~- Cannot be used')
+            return
+            
         print(f'Register pressed: Username - {username}, Password - {password}')
         s.send(f'register-~-{username}-~-{password}'.encode())
         result = s.recv(1024).decode()  # Get the result from the server
