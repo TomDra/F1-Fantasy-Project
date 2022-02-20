@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtGui import QIcon, QPixmap
 import sys
 from client import functions as f
 
@@ -12,6 +13,18 @@ class HTP_Dialogue_Box(QtWidgets.QDialog):
         self.ok_button = self.findChild(QtWidgets.QPushButton, 'ok_button')
         self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
 
+class Point_Calculation_Dialogue_Box(QtWidgets.QDialog):
+    """Display the point calculation dialogue box"""
+    def __init__(self):
+        super(Point_Calculation_Dialogue_Box, self).__init__()
+        uic.loadUi('gui_files/point_calculation.ui', self)
+        self.setWindowTitle('Point Calculation')  # set title
+        label = self.findChild(QtWidgets.QLabel, 'point_calculation_pixelmap')
+        pixmap = QPixmap('gui_files/points_value_calculation.png')
+        label.setPixmap(pixmap)
+        self.show()
+        self.ok_button = self.findChild(QtWidgets.QPushButton, 'ok_button')
+        self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
     def __init__(self, temp_username, temp_password):
@@ -36,11 +49,15 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         #self.edit_team_button.clicked.connect(self.edit_team)
         self.how_to_play_button.clicked.connect(self.how_to_play)
         #self.recent_driver_changes_button.clicked.connect(self.recent_driver_changes)
-        #self.how_val_calc_button.clicked.connect(self.how_val_calc)
+        self.how_val_calc_button.clicked.connect(self.how_val_calc)
 
     def how_to_play(self):
         self.htp_dialogue_box = HTP_Dialogue_Box()
         self.htp_dialogue_box.show()  # show dialogue box
+
+    def how_val_calc(self):
+        self.point_calculation_dialogue_box = Point_Calculation_Dialogue_Box()
+        self.point_calculation_dialogue_box.show()  # show dialogue box
 
     def refresh_team_data(self):
         s = f.connect_to_server()
