@@ -1,5 +1,8 @@
+import datetime
+import os,socket, ast, json
+
+
 def connect_to_server():
-    import socket, ast
     f = open('scripts/connect.private', 'r')    # Open the file containing the ip and port
     socket_connect = ast.literal_eval(f.read().replace('\n', ''))    # Read the file and convert it to a dictionary
     f.close()
@@ -7,3 +10,23 @@ def connect_to_server():
     s.connect((socket_connect[0], int(socket_connect[1])))
     return s
 
+def create_points_file():
+    f = open('data/points.json')
+    s = connect_to_server()
+    s.send(b'point data')   # todo: create this command on server side
+    point_data = s.recv(2048).decode()
+    f.write(f'[{datetime.date.today()},{point_data}]')
+    f.close()
+
+def return_driver_points(driver):
+    if not os.exists('data/points.json'):
+        create_points_file()
+    else:
+        f = open('data/points.json')
+        data = json.load(f)
+        if data[0] != datetime.date.today():
+            f.close()
+            create_points_file()
+        else:
+            f.close()
+            return data[1][driver]

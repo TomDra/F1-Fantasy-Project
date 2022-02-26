@@ -1,8 +1,6 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 import sys
-import requests
-import datetime
 import functions as f
 from scripts.login import LoginUser
 
@@ -50,17 +48,9 @@ class Edit_Team(QtWidgets.QMainWindow):
         constructors = data.split('---')[1].split(',')
         for driver_combo_box in self.driver_comboboxes:
             for driver in drivers:
-                driver_combo_box.addItems(f'{driver} - {get_driver_points(driver)}')    #fixme: get points from server
+                driver_combo_box.addItems(f'{driver} - {f.return_driver_points(driver)}')    #fixme: get points from server
         for constructor in constructors:
             self.constructor_combobox.addItems(f'{constructor}')
-
-
-
-
-
-        #year = datetime.datetime.now().year-1
-        #drivers = requests.get(f'https://ergast.com/api/f1/{year}/drivers.json').json()['MRData']['DriverTable']['Drivers']
-        #print(drivers)
 
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
