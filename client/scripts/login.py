@@ -1,6 +1,6 @@
 import ast
 import sys
-from client import functions as f
+import functions as f
 from PyQt5 import QtWidgets, uic
 
 class LoginUser:

@@ -12,6 +12,7 @@ __pycache__/
 server/points/*.txt
 server/points/*.json
 server/points/*.csv
+client/.idea/
 
 # Distribution / packaging
 .Python

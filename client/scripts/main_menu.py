@@ -1,8 +1,10 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 import sys
-from client import functions as f
-from client.scripts.login import LoginUser
+import requests
+import datetime
+import functions as f
+from scripts.login import LoginUser
 
 class HTP_Dialogue_Box(QtWidgets.QDialog):
     """Display the how to play dialog box"""
@@ -27,6 +29,40 @@ class Point_Calculation_Dialogue_Box(QtWidgets.QDialog):
         self.ok_button = self.findChild(QtWidgets.QPushButton, 'ok_button')
         self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
 
+class Edit_Team(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Edit_Team, self).__init__()
+        uic.loadUi('gui_files/edit_team.ui', self)
+        self.setWindowTitle('Edit Team')  # set title
+        self.set_combo_box_data()
+        for i in range(1,5+1):
+            self.driver_comboboxes.append(self.findChild(QtWidgets.QComboBox, f'driver_combobox_{i}'))
+        self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_combobox')
+        self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
+        self.show()
+
+    def set_combo_box_data(self):
+        """Set the data for the combo box"""
+        s = f.connect_to_server()
+        s.send(b'get_driver_and_team_names')
+        data = s.recv(1024).decode()    # get data from server in [driver1,driver2---team1,team2]
+        drivers = data.split('---')[0].split(',')
+        constructors = data.split('---')[1].split(',')
+        for driver_combo_box in self.driver_comboboxes:
+            for driver in drivers:
+                driver_combo_box.addItems(f'{driver} - {get_driver_points(driver)}')    #fixme: get points from server
+        for constructor in constructors:
+            self.constructor_combobox.addItems(f'{constructor}')
+
+
+
+
+
+        #year = datetime.datetime.now().year-1
+        #drivers = requests.get(f'https://ergast.com/api/f1/{year}/drivers.json').json()['MRData']['DriverTable']['Drivers']
+        #print(drivers)
+
+
 class Main_Menu_Ui(QtWidgets.QMainWindow):
     def __init__(self, temp_username, temp_password):
         super(Main_Menu_Ui, self).__init__()  # Call the inherited classes __init__ method
@@ -47,7 +83,7 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         """bind buttons to functions"""
         self.refresh_button.clicked.connect(self.refresh_team_data)
         self.exit_button.clicked.connect(self.sign_out)
-        #self.edit_team_button.clicked.connect(self.edit_team)
+        self.edit_team_button.clicked.connect(self.edit_team_func)
         self.how_to_play_button.clicked.connect(self.how_to_play)
         #self.recent_driver_changes_button.clicked.connect(self.recent_driver_changes)
         self.how_val_calc_button.clicked.connect(self.how_val_calc)
@@ -65,6 +101,10 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         s.send(f'return_team-~-{self.username}-~-{self.password}'.encode())
         result = s.recv(1024).decode()
         print(result)
+
+    def edit_team_func(self):
+        self.edit_team_ui = Edit_Team()
+        self.edit_team_ui.show()
 
     def sign_out(self):
         self.close()
