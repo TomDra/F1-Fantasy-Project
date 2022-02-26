@@ -3,12 +3,24 @@ import sys
 from client import functions as f
 from PyQt5 import QtWidgets, uic
 
+class LoginUser:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    def get_username(self):
+        return self.username
+
+    def get_password(self):
+        return self.password
+
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super(Ui, self).__init__()  # Call the inherited classes __init__ method
         uic.loadUi('gui_files/login.ui', self)  # Load the .ui file
         self.show()  # Show the GUI
         self.logged_in = False  # Set logged_in to False
+        self.logged_in_user = None
 
         """Find all Login Widgets"""
         self.login_button = self.findChild(QtWidgets.QPushButton, 'login_button')
@@ -41,6 +53,7 @@ class Ui(QtWidgets.QMainWindow):
         if result == 'True':
             print('Login successful')
             self.logged_in = True
+            self.logged_in_user = LoginUser(username, password)
             self.close()  # If Login successful close the login window
         elif not ast.literal_eval(result)[0]:
             self.login_errorbox.setText('Username or password incorrect')
@@ -81,8 +94,14 @@ class Ui(QtWidgets.QMainWindow):
         """Get the logged_in value"""
         return self.logged_in
 
+    def get_logged_in_user(self):
+        """Get the logged_in_user value"""
+        return self.logged_in_user
+
 def login():
     app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
     window = Ui() # Create an instance of our class
     app.exec_() # Start the application
-    return window.get_logged_in() # Return the logged_in value
+    if window.get_logged_in(): # Return the logged_in value
+        return window.get_logged_in_user()
+    # todo: else

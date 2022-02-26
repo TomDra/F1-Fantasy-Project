@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 import sys
 from client import functions as f
+from client.scripts.login import LoginUser
 
 class HTP_Dialogue_Box(QtWidgets.QDialog):
     """Display the how to play dialog box"""
@@ -73,9 +74,9 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
 
 
 
-def main():
+def main(login_user: LoginUser):
     app = QtWidgets.QApplication(sys.argv)  # Create an instance of QtWidgets.QApplication
-    window = Main_Menu_Ui('test','test')  # Create an instance of our class
+    window = Main_Menu_Ui(login_user.get_username(), login_user.get_password())  # Create an instance of our class
     app.exec_()  # Start the application
 
 
