@@ -46,9 +46,10 @@ class Edit_Team(QtWidgets.QMainWindow):
         data = s.recv(1024).decode()    # get data from server in [driver1,driver2---team1,team2]
         drivers = data.split('---')[0].split(',')
         constructors = data.split('---')[1].split(',')
-        for driver_combo_box in self.driver_comboboxes:
+        for driver_combo_box in self.driver_comboboxes: # loop through the driver combo boxes
             for driver in drivers:
-                driver_combo_box.addItems(f'{driver} - {f.return_driver_points(driver)}')    #fixme: get points from server
+                driver_combo_box.addItems(f'{driver} - {f.return_driver_points(driver)}')
+                # add each driver and their points to the combo box
         for constructor in constructors:
             self.constructor_combobox.addItems(f'{constructor}')
 

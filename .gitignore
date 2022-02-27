@@ -8,6 +8,7 @@ __pycache__/
 
 # Personal
 .idea/*
+*/.idea/*
 *.db
 server/points/*.txt
 server/points/*.json
