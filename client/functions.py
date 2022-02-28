@@ -11,20 +11,22 @@ def connect_to_server():
     return s
 
 def create_points_file():
-    f = open('data/points.json')
+    f = open('data/points.json', 'w+')
     s = connect_to_server()
-    s.send(b'point data')   # todo: create this command on server side
+    s.send(b'return_point_data')   # todo: create this command on server side
     point_data = s.recv(2048).decode()
-    f.write(f'[{datetime.date.today()},{point_data}]')
+    f.write(f'["{datetime.date.today()}",{point_data}]')
     f.close()
 
 def return_driver_points(driver):
-    if not os.exists('data/points.json'):
+    if not os.path.exists('data/points.json'):
+        if not os.path.exists(('data')):
+            os.makedirs('data')
         create_points_file()
     else:
         f = open('data/points.json')
-        data = json.load(f)
-        if data[0] != datetime.date.today():
+        data = ast.literal_eval(f.read())   #fixme
+        if data[0] != str(datetime.date.today()) or data[1] == '[]':
             f.close()
             create_points_file()
         else:

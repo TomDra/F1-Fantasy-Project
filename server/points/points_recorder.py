@@ -8,21 +8,34 @@ directory = 'points/'
 lock = Lock()
 
 def get_drivers():
-  data = requests.get('http://ergast.com/api/f1/drivers.json?limit=1900&offset=30')
-  drivers = ast.literal_eval(data.content.decode())['MRData']['DriverTable']['Drivers']
+  year = date.today().year
+  driver_data = requests.get(f'https://ergast.com/api/f1/{year}/drivers.json')
+  constructor_data = requests.get(f'https://ergast.com/api/f1/{year}/constructors.json')
+  constructors = ast.literal_eval(constructor_data.content.decode())['MRData']['ConstructorTable']['Constructors']
+  drivers = ast.literal_eval(driver_data.content.decode())['MRData']['DriverTable']['Drivers']
+  if drivers == [] or constructors == []:
+    driver_data = requests.get(f'https://ergast.com/api/f1/{year-1}/drivers.json')
+    constructor_data = requests.get(f'https://ergast.com/api/f1/{year-1}/constructors.json')
+    constructors = ast.literal_eval(constructor_data.content.decode())['MRData']['ConstructorTable']['Constructors']
+    drivers = ast.literal_eval(driver_data.content.decode())['MRData']['DriverTable']['Drivers']
+
   detail_driver_list = []
-  file = open(f'{directory}drivers.txt', 'w+')
+  detail_constructor_list = []
   for driver in drivers:
-    try:
-      driver_id = driver['driverId']
-      full_name = f"{driver['givenName']} {driver['familyName']}"
-      nationality = driver['nationality']
-      DoB = driver['dateOfBirth']
-      number = driver['permanentNumber']
-    except Exception:
-      number = 'n/a'
-    detail_driver_list.append([driver_id,full_name,nationality,DoB,number])
-  file.write(str(detail_driver_list))
+    driver_id = driver['driverId']
+    full_name = f"{driver['givenName']} {driver['familyName']}"
+    detail_driver_list.append([driver_id,full_name])#,nationality,DoB,number])
+  for constructor in constructors:
+    constructor_id = constructor['constructorId']
+    name = constructor['name']
+    detail_constructor_list.append([constructor_id, name])
+
+  driver_file = open(f'{directory}current_drivers.txt', 'w+')
+  driver_file.write(str(detail_driver_list))
+  driver_file.close()
+  constructor_file = open(f'{directory}current_constructors.txt', 'w+')
+  constructor_file.write(str(detail_constructor_list))
+  constructor_file.close()
 
 def save_to_file(queue):
   file = open(f'{directory}raw_points.csv', 'w+')

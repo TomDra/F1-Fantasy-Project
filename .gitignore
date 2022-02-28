@@ -137,3 +137,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 ~$46 Programming Project.docx
+client/data/points.json
