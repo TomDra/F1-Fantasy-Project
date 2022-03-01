@@ -60,8 +60,7 @@ def return_team(userID):
 
 if __name__ == '__main__':
   try:
-    pass
-    #create_driver_points()
+    create_driver_points()
   except SyntaxError:
     print('API Offline')
   main()
