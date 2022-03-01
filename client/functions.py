@@ -14,21 +14,28 @@ def create_points_file():
     f = open('data/points.json', 'w+')
     s = connect_to_server()
     s.send(b'return_point_data')   # todo: create this command on server side
-    point_data = s.recv(2048).decode()
+    point_data = s.recv(100080).decode()
     f.write(f'["{datetime.date.today()}",{point_data}]')
     f.close()
 
-def return_driver_points(driver):
+def return_points(driver):
     if not os.path.exists('data/points.json'):
         if not os.path.exists(('data')):
             os.makedirs('data')
         create_points_file()
-    else:
-        f = open('data/points.json')
-        data = ast.literal_eval(f.read())   #fixme
-        if data[0] != str(datetime.date.today()) or data[1] == '[]':
-            f.close()
-            create_points_file()
-        else:
-            f.close()
-            return data[1][driver]
+
+    f = open('data/points.json')
+    data = ast.literal_eval(f.read())   #fixme
+    if data[0] != str(datetime.date.today()) or data[1] == '[]':
+        f.close()
+        create_points_file()
+    f.close()
+    print(driver)
+
+    try:
+        return data[1][0][driver[1]]
+    except KeyError:
+        try:
+            return data[1][1][driver[0]]
+        except KeyError:
+            print('Driver/ Constructor not in point data')

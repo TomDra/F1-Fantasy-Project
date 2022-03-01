@@ -33,12 +33,12 @@ class Edit_Team(QtWidgets.QMainWindow):
         super(Edit_Team, self).__init__()
         uic.loadUi('gui_files/edit_team.ui', self)
         self.setWindowTitle('Edit Team')  # set title
-        self.set_combo_box_data()
         #self.driver_comboboxes = []
         #for i in range(1,5+1):
             #self.driver_comboboxes.append(self.findChild(QtWidgets.QComboBox, f'driver_combobox_{i}'))
-        self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_combobox')
+        self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
+        self.set_combo_box_data()
         self.show()
 
     def set_combo_box_data(self):
@@ -51,11 +51,11 @@ class Edit_Team(QtWidgets.QMainWindow):
         #for self.driver_combo_box in self.driver_comboboxes: # loop through the driver combo boxes
         for i in range(1, 5 + 1):
             self.driver_combo_box = self.findChild(QtWidgets.QComboBox, f'driver_drop{i}')
-            for driver in drivers:
-                self.driver_combo_box.addItems(f'{driver} - {f.return_driver_points(driver)}')
+            for driver in ast.literal_eval(drivers):
+                self.driver_combo_box.addItem(f'{driver[1]} - {f.return_points(driver)}')
                 # add each driver and their points to the combo box
-        for constructor in constructors:
-            self.constructor_combobox.addItems(f'{constructor}')
+        for constructor in ast.literal_eval(constructors):
+            self.constructor_combobox.addItem(f'{constructor[1]} - {f.return_points(constructor)}')
 
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):

@@ -55,12 +55,7 @@
        <widget class="QComboBox" name="constructor_drop">
         <item>
          <property name="text">
-          <string>1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
+          <string>Constructor</string>
          </property>
         </item>
        </widget>
@@ -144,7 +139,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="driver_drop1"/>
+         <widget class="QComboBox" name="driver_drop1">
+          <item>
+           <property name="text">
+            <string>Driver</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_9">
@@ -167,7 +168,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="driver_drop2"/>
+         <widget class="QComboBox" name="driver_drop2">
+          <item>
+           <property name="text">
+            <string>Driver</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_10">
@@ -190,7 +197,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="driver_drop3"/>
+         <widget class="QComboBox" name="driver_drop3">
+          <item>
+           <property name="text">
+            <string>Driver</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_11">
@@ -213,7 +226,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="driver_drop4"/>
+         <widget class="QComboBox" name="driver_drop4">
+          <item>
+           <property name="text">
+            <string>Driver</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_12">
@@ -236,7 +255,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="driver_drop5"/>
+         <widget class="QComboBox" name="driver_drop5">
+          <item>
+           <property name="text">
+            <string>Driver</string>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </item>
