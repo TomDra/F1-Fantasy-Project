@@ -106,8 +106,6 @@ def handle_client_login(client_socket):
     current_constructors = current_constructors.read()
     client_socket.send(str([current_drivers, current_constructors]).encode())
 
-
-  #todo:add
   else:
     client_socket.send(b'Invalid Request')
   return False

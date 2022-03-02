@@ -22,7 +22,7 @@ def create_driver_file():
 
 def return_current_drivers_and_constructors():
     if not os.path.exists('data/drivers.json'):
-        if not os.path.exists(('data')):
+        if not os.path.exists('data'):
             os.makedirs('data')
         create_driver_file()
 
@@ -41,7 +41,7 @@ def return_current_drivers_and_constructors():
 def create_points_file():
     f = open('data/points.json', 'w+')
     s = connect_to_server()
-    s.send(b'return_point_data')   # todo: create this command on server side
+    s.send(b'return_point_data')
     point_data = s.recv(100080).decode()
     f.write(f'["{datetime.date.today()}",{point_data}]')
     f.close()
@@ -52,7 +52,7 @@ def return_points(driver):
             os.makedirs('data')
         create_points_file()
     f = open('data/points.json')
-    data = ast.literal_eval(f.read())   #fixme
+    data = ast.literal_eval(f.read())
     if data[0] != str(datetime.date.today()) or data[1] == '[]':
         f.close()
         create_points_file()
@@ -66,12 +66,8 @@ def return_points(driver):
             print('Driver/ Constructor not in point data')
 
 
-def send_team_data(driver_data, constructor_data):
-    from scripts.login import LoginUser
-    login_user = LoginUser()#fixme: get users login info
-    username = login_user.get_username()
-    password = login_user.get_password()
+def send_team_data(username, password, driver_data, constructor_data):
     s = connect_to_server()
-    s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}')
+    s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}'.encode())
     result = s.recv(1024).decode()
     return result

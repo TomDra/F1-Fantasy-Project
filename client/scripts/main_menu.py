@@ -29,9 +29,11 @@ class Point_Calculation_Dialogue_Box(QtWidgets.QDialog):
         self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
 
 class Edit_Team(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, username, password):
         super(Edit_Team, self).__init__()
         uic.loadUi('gui_files/edit_team.ui', self)
+        self.username = username
+        self.password = password
         self.setWindowTitle('Edit Team')  # set title
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
@@ -62,7 +64,7 @@ class Edit_Team(QtWidgets.QMainWindow):
             driver_data.append(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText())
         constructor_data = self.findChild(QtWidgets.QComboBox, 'constructor_drop').currentText()
         # send the data to the server
-        result = f.send_team_data(driver_data, constructor_data)
+        result = f.send_team_data(self.username, self.password, driver_data, constructor_data)
         print(result)
         if result == 'True':
             self.close()
@@ -108,7 +110,7 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         print(result)
 
     def edit_team_func(self):
-        self.edit_team_ui = Edit_Team()
+        self.edit_team_ui = Edit_Team(self.username, self.password)
         self.edit_team_ui.show()
 
     def sign_out(self):

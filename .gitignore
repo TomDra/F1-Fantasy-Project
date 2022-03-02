@@ -139,3 +139,4 @@ dmypy.json
 ~$46 Programming Project.docx
 client/data/points.json
 client/data/drivers.json
+server/teamData.db-journal
