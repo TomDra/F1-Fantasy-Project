@@ -36,6 +36,7 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
         self.set_combo_box_data()
+        self.submit_button.clicked.connect(self.submit_button_clicked)
         self.show()
 
     def set_combo_box_data(self):
@@ -52,6 +53,19 @@ class Edit_Team(QtWidgets.QMainWindow):
                 # add each driver and their points to the combo box
         for constructor in ast.literal_eval(constructors):
             self.constructor_combobox.addItem(f'{constructor[1]} - {f.return_points(constructor)}')
+
+    def submit_button_clicked(self):
+        """Submit the data to the server"""
+        # get the data from the combo boxes
+        driver_data = []
+        for i in range(1, 6):
+            driver_data.append(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText())
+        constructor_data = self.findChild(QtWidgets.QComboBox, 'constructor_drop').currentText()
+        # send the data to the server
+        result = f.send_team_data(driver_data, constructor_data)
+        print(result)
+        if result == 'True':
+            self.close()
 
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
