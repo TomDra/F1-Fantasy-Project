@@ -104,7 +104,7 @@ def handle_client_login(client_socket):
     current_constructors = open('points/current_constructors.txt', 'r')
     current_drivers = current_drivers.read()
     current_constructors = current_constructors.read()
-    client_socket.send(json.dumps([current_drivers, current_constructors]).encode())
+    client_socket.send(str([current_drivers, current_constructors]).encode())
 
 
   #todo:add

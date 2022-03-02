@@ -138,3 +138,4 @@ dmypy.json
 .pyre/
 ~$46 Programming Project.docx
 client/data/points.json
+client/data/drivers.json

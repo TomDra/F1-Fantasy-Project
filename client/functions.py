@@ -10,6 +10,34 @@ def connect_to_server():
     s.connect((socket_connect[0], int(socket_connect[1])))
     return s
 
+
+def create_driver_file():
+    s = connect_to_server()
+    s.send(b'return_current_driver_and_constructors')
+    data = ast.literal_eval(s.recv(10028).decode())
+    f = open('data/drivers.json', 'w+')
+    f.write(str(data))
+    f.close()
+
+
+def return_current_drivers_and_constructors():
+    if not os.path.exists('data/drivers.json'):
+        if not os.path.exists(('data')):
+            os.makedirs('data')
+        create_driver_file()
+
+    if os.path.getmtime('data/drivers.json')/60/60/24 < 1:  # if the file is older than 1 day
+        create_driver_file()
+
+    f = open('data/drivers.json', 'r')
+    data = f.read()
+    if data == '[]' or data == None:
+        f.close()
+        create_points_file()
+        f = open('data/drivers.json', 'r')
+    f.close()
+    return ast.literal_eval(data)
+
 def create_points_file():
     f = open('data/points.json', 'w+')
     s = connect_to_server()
@@ -30,7 +58,6 @@ def return_points(driver):
         f.close()
         create_points_file()
     f.close()
-    print(driver)
 
     try:
         return data[1][0][driver[1]]

@@ -33,9 +33,6 @@ class Edit_Team(QtWidgets.QMainWindow):
         super(Edit_Team, self).__init__()
         uic.loadUi('gui_files/edit_team.ui', self)
         self.setWindowTitle('Edit Team')  # set title
-        #self.driver_comboboxes = []
-        #for i in range(1,5+1):
-            #self.driver_comboboxes.append(self.findChild(QtWidgets.QComboBox, f'driver_combobox_{i}'))
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
         self.set_combo_box_data()
@@ -43,13 +40,12 @@ class Edit_Team(QtWidgets.QMainWindow):
 
     def set_combo_box_data(self):
         """Set the data for the combo box"""
-        s = f.connect_to_server()
-        s.send(b'return_current_driver_and_constructors')
-        data = ast.literal_eval(s.recv(1024).decode())    # get data from server in [driver1,driver2---team1,team2]
+        data = f.return_current_drivers_and_constructors()
+        # get data from server in  form [[driver1,driver2],[team1,team2]]
         drivers = data[0]
         constructors = data[1]
-        #for self.driver_combo_box in self.driver_comboboxes: # loop through the driver combo boxes
-        for i in range(1, 5 + 1):
+        # loop through the driver combo boxes
+        for i in range(1, 6):
             self.driver_combo_box = self.findChild(QtWidgets.QComboBox, f'driver_drop{i}')
             for driver in ast.literal_eval(drivers):
                 self.driver_combo_box.addItem(f'{driver[1]} - {f.return_points(driver)}')
