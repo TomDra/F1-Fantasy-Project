@@ -35,9 +35,11 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.username = username
         self.password = password
         self.setWindowTitle('Edit Team')  # set title
+        '''find combo boxes and buttons'''
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
-        self.set_combo_box_data()
+
+        self.set_combo_box_data() # set driver and constructor combobox items
         self.submit_button.clicked.connect(self.submit_button_clicked)
         self.show()
 
