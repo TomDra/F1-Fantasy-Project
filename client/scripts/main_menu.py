@@ -2,6 +2,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QIcon, QPixmap
 import sys
 import ast
+import time
+import threading
 import functions as f
 from scripts.login import LoginUser
 
@@ -34,19 +36,21 @@ class Edit_Team(QtWidgets.QMainWindow):
         uic.loadUi('gui_files/edit_team.ui', self)
         self.username = username
         self.password = password
+        self.finished = False
         self.setWindowTitle('Edit Team')  # set title
         '''find combo boxes and buttons'''
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
 
-        self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_team_value')
-        self.remaning_money_label = self.findChild(QtWidgets.QLabel, 'remaining_money')
+        self.total_team_value_label = self.findChild(QtWidgets.QLabel, 'total_team_value')
+        self.remaining_money_label = self.findChild(QtWidgets.QLabel, 'remaining_money')
         self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_money')
-
 
         self.set_combo_box_data() # set driver and constructor combobox items
         self.submit_button.clicked.connect(self.submit_button_clicked)
+        threading.Thread(target=self.label_edit_loop).start()
         self.show()
+
 
     def set_combo_box_data(self):
         """Set the data for the combo box"""
@@ -58,13 +62,14 @@ class Edit_Team(QtWidgets.QMainWindow):
         for i in range(1, 6):
             self.driver_combo_box = self.findChild(QtWidgets.QComboBox, f'driver_drop{i}')
             for driver in ast.literal_eval(drivers):
-                self.driver_combo_box.addItem(f'{driver[1]} - {f.return_points(driver)}')
+                self.driver_combo_box.addItem(f'{driver[1]} - {f.convert_points(f.return_points(driver))}')
                 # add each driver and their points to the combo box
         for constructor in ast.literal_eval(constructors):
-            self.constructor_combobox.addItem(f'{constructor[1]} - {f.return_points(constructor)}')
+            self.constructor_combobox.addItem(f'{constructor[1]} - {f.convert_points(f.return_points(constructor))}')
 
     def submit_button_clicked(self):
         """Submit the data to the server"""
+        self.finished = True
         # get the data from the combo boxes
         driver_data = []
         for i in range(1, 6):
@@ -72,15 +77,31 @@ class Edit_Team(QtWidgets.QMainWindow):
         constructor_data = self.constructor_combobox.currentText()
         # send the data to the server
         result = f.send_team_data(self.username, self.password, driver_data, constructor_data)
-        print(result)
         if result == 'True':
             self.close()
 
     def label_edit_loop(self):  #todo
-        driver_data = []
-        for i in range(1, 6):
-            driver_data.append(int(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText().split(' - ')[1]))
-        constructor_data = int(self.constructor_combobox.currentText().split(' - ')[1])
+        if self.total_money_label.text() == 'PLACEHOLDER':
+            self.total_money_label.setText('1000000')
+        while self.finished == False:
+            time.sleep(0.5)
+            driver_data = []
+            for i in range(1, 6):   # for each combo box
+                try:    # if there is data to collect
+                    driver_data.append(int(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText().split(' - ')[1]))
+                except IndexError:
+                    driver_data.append(0)
+            try:    # if there is data to collect
+                constructor_data = int(self.constructor_combobox.currentText().split(' - ')[1])
+            except IndexError:
+                constructor_data = 0
+            total = sum(driver_data)+constructor_data
+            remaining_money = int(self.total_money_label.text()) - total
+            self.total_team_value_label.setText(str(total))  # set label text
+            self.remaining_money_label.setText(str(remaining_money))  # set label text
+
+    def closeEvent(self, event):
+        self.finished = True
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
     def __init__(self, temp_username, temp_password):

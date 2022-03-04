@@ -25,12 +25,11 @@ def return_current_drivers_and_constructors():
         if not os.path.exists('data'):
             os.makedirs('data')
         create_driver_file()
-
     if os.path.getmtime('data/drivers.json')/60/60/24 < 1:  # if the file is older than 1 day
         create_driver_file()
 
     f = open('data/drivers.json', 'r')
-    data = f.read()
+    data = f.read()    # get data from file
     if data == '[]' or data == None:
         f.close()
         create_points_file()
@@ -71,3 +70,6 @@ def send_team_data(username, password, driver_data, constructor_data):
     s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}'.encode())
     result = s.recv(1024).decode()
     return result
+
+def convert_points(points):
+    return str(int(points)*5500)
