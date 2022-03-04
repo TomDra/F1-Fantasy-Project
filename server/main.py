@@ -41,12 +41,14 @@ def main():
 
 def handle_client(client_socket):
   user = net.handle_client_login(client_socket)
+  sqliteConnection.commit()
 
 
 def save_team(userID, constructor, drivers):
   """Save the team data to the database"""
   """IF DATA EXISTS, UPDATE IT"""
   dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers) VALUES ({userID}, "{constructor}", "{drivers}")')
+  sqliteConnection.commit()
   return True
 
 

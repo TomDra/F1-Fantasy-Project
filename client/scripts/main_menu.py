@@ -39,6 +39,11 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.constructor_combobox = self.findChild(QtWidgets.QComboBox, 'constructor_drop')
         self.submit_button = self.findChild(QtWidgets.QPushButton, 'submit_button')
 
+        self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_team_value')
+        self.remaning_money_label = self.findChild(QtWidgets.QLabel, 'remaining_money')
+        self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_money')
+
+
         self.set_combo_box_data() # set driver and constructor combobox items
         self.submit_button.clicked.connect(self.submit_button_clicked)
         self.show()
@@ -64,13 +69,18 @@ class Edit_Team(QtWidgets.QMainWindow):
         driver_data = []
         for i in range(1, 6):
             driver_data.append(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText())
-        constructor_data = self.findChild(QtWidgets.QComboBox, 'constructor_drop').currentText()
+        constructor_data = self.constructor_combobox.currentText()
         # send the data to the server
         result = f.send_team_data(self.username, self.password, driver_data, constructor_data)
         print(result)
         if result == 'True':
             self.close()
 
+    def label_edit_loop(self):  #todo
+        driver_data = []
+        for i in range(1, 6):
+            driver_data.append(int(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText().split(' - ')[1]))
+        constructor_data = int(self.constructor_combobox.currentText().split(' - ')[1])
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
     def __init__(self, temp_username, temp_password):
