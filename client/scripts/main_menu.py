@@ -7,6 +7,16 @@ import threading
 import functions as f
 from scripts.login import LoginUser
 
+class Recent_Point_Changes(QtWidgets.QDialog):
+    """Display the point changes dialog box"""
+    def __init__(self):
+        super(Recent_Point_Changes, self).__init__()
+        uic.loadUi('gui_files/point_changes.ui', self)
+        self.setWindowTitle('Recent Driver and Constructor Point Changes')  # set title
+        self.show()
+        self.ok_button = self.findChild(QtWidgets.QPushButton, 'ok_button')
+        self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
+
 class HTP_Dialogue_Box(QtWidgets.QDialog):
     """Display the how to play dialog box"""
     def __init__(self):
@@ -125,8 +135,12 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.exit_button.clicked.connect(self.sign_out)
         self.edit_team_button.clicked.connect(self.edit_team_func)
         self.how_to_play_button.clicked.connect(self.how_to_play)
-        #self.recent_driver_changes_button.clicked.connect(self.recent_driver_changes)
+        self.recent_driver_changes_button.clicked.connect(self.recent_point_changes)
         self.how_val_calc_button.clicked.connect(self.how_val_calc)
+
+    def recent_point_changes(self):
+        self.recent_points_change = Recent_Point_Changes()
+        self.recent_points_change.show()
 
     def how_to_play(self):
         self.htp_dialogue_box = HTP_Dialogue_Box()

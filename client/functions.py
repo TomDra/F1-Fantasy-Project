@@ -15,25 +15,25 @@ def create_driver_file():
     s = connect_to_server()
     s.send(b'return_current_driver_and_constructors')
     data = ast.literal_eval(s.recv(10028).decode())
-    f = open('data/drivers.json', 'w+')
+    f = open('data/current_drivers_and_constructors.json', 'w+')
     f.write(str(data))
     f.close()
 
 
 def return_current_drivers_and_constructors():
-    if not os.path.exists('data/drivers.json'):
+    if not os.path.exists('data/current_drivers_and_constructors.json'):
         if not os.path.exists('data'):
             os.makedirs('data')
         create_driver_file()
-    if os.path.getmtime('data/drivers.json')/60/60/24 < 1:  # if the file is older than 1 day
+    if os.path.getmtime('data/current_drivers_and_constructors.json')/60/60/24 < 1:  # if the file is older than 1 day
         create_driver_file()
 
-    f = open('data/drivers.json', 'r')
+    f = open('data/current_drivers_and_constructors.json', 'r')
     data = f.read()    # get data from file
     if data == '[]' or data == None:
         f.close()
-        create_points_file()
-        f = open('data/drivers.json', 'r')
+        create_driver_file()
+        f = open('data/current_drivers_and_constructors.json', 'r')
     f.close()
     return ast.literal_eval(data)
 
@@ -57,10 +57,10 @@ def return_points(driver):
         create_points_file()
     f.close()
     try:
-        return data[1][0][driver[1]]
+        return data[1][0][driver[1]]  # try driver in driver list
     except KeyError:
         try:
-            return data[1][1][driver[0]]
+            return data[1][1][driver[0]]  # try constructor in constructor list
         except KeyError:
             print('Driver/ Constructor not in point data')
 
@@ -72,4 +72,4 @@ def send_team_data(username, password, driver_data, constructor_data):
     return result
 
 def convert_points(points):
-    return str(int(points)*5500)
+    return str(250 + int(points)*20)

@@ -140,3 +140,4 @@ dmypy.json
 client/data/points.json
 client/data/drivers.json
 server/teamData.db-journal
+client/data/current_drivers_and_constructors.json
