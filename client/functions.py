@@ -12,6 +12,7 @@ def connect_to_server():
 
 
 def create_driver_file():
+    # Get data from server and Create the file containing the drivers and constructors
     s = connect_to_server()
     s.send(b'return_current_driver_and_constructors')
     data = ast.literal_eval(s.recv(10028).decode())
@@ -22,7 +23,7 @@ def create_driver_file():
 
 def return_current_drivers_and_constructors():
     if not os.path.exists('data/current_drivers_and_constructors.json'):
-        if not os.path.exists('data'):
+        if not os.path.exists('data'):  # Create the data folder if it doesn't exist
             os.makedirs('data')
         create_driver_file()
     if os.path.getmtime('data/current_drivers_and_constructors.json')/60/60/24 < 1:  # if the file is older than 1 day
@@ -38,6 +39,7 @@ def return_current_drivers_and_constructors():
     return ast.literal_eval(data)
 
 def create_points_file():
+    # Get data from server and create the file containing the point data
     f = open('data/points.json', 'w+')
     s = connect_to_server()
     s.send(b'return_point_data')
@@ -52,7 +54,7 @@ def return_points(driver):
         create_points_file()
     f = open('data/points.json')
     data = ast.literal_eval(f.read())
-    if data[0] != str(datetime.date.today()) or data[1] == '[]':
+    if data[0] != str(datetime.date.today()) or data[1] == '[]':    # if the file is older than 1 day or empty
         f.close()
         create_points_file()
     f.close()

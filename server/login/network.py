@@ -94,18 +94,19 @@ def handle_client_login(client_socket):
       result = login_result
     client_socket.send(str(result).encode())
   elif request[0] == 'return_point_data':
+    # get point data from files and send to client
     team_points = open('points/team_points.json')
     driver_points = open('points/driver_points.json')
     team_points = json.load(team_points)
     driver_points = json.load(driver_points)
     client_socket.send(json.dumps([team_points, driver_points]).encode())
   elif request[0] == 'return_current_driver_and_constructors':
+    # get current driver and constructor data from files and send to client
     current_drivers = open('points/current_drivers.txt', 'r')
     current_constructors = open('points/current_constructors.txt', 'r')
     current_drivers = current_drivers.read()
     current_constructors = current_constructors.read()
     client_socket.send(str([current_drivers, current_constructors]).encode())
-
   else:
     client_socket.send(b'Invalid Request')
   return False

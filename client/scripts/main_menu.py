@@ -90,7 +90,8 @@ class Edit_Team(QtWidgets.QMainWindow):
         if result == 'True':
             self.close()
 
-    def label_edit_loop(self):  #todo
+    def label_edit_loop(self):
+        """Loop to update the labels"""
         if self.total_money_label.text() == 'PLACEHOLDER':
             self.total_money_label.setText('1000000')
         while self.finished == False:
