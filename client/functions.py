@@ -59,12 +59,12 @@ def return_points(driver):
         create_points_file()
     f.close()
     try:
-        return data[1][0][driver[1]]  # try driver in driver list
+        return data[1][1][driver[0]]  # try driver in driver list
     except KeyError:
         try:
-            return data[1][1][driver[0]]  # try constructor in constructor list
+            return data[1][0][driver[1]]  # try constructor in constructor list
         except KeyError:
-            print('Driver/ Constructor not in point data')
+            print(driver, 'Driver/ Constructor not in point data')
 
 
 def send_team_data(username, password, driver_data, constructor_data):
@@ -72,6 +72,17 @@ def send_team_data(username, password, driver_data, constructor_data):
     s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}'.encode())
     result = s.recv(1024).decode()
     return result
+
+def convert_name_to_id(name):
+    '''use the current_drivers_and_constructors.json file to convert the name[1] to the id[0]'''
+    data = return_current_drivers_and_constructors()
+    for driver in ast.literal_eval(data[0]):
+        if driver[1] == name:
+            return driver[0]
+    for constructor in ast.literal_eval(data[1]):
+        if constructor[1] == name:
+            return constructor[0]
+
 
 def convert_points(points):
     return str(250 + int(points)*20)

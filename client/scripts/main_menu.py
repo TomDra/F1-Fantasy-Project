@@ -139,6 +139,18 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.recent_driver_changes_button.clicked.connect(self.recent_point_changes)
         self.how_val_calc_button.clicked.connect(self.how_val_calc)
 
+        '''Find all labels called team_price, constructor, next_race and driver1 to driver5'''
+        self.driver_labels = []
+        self.next_race_label = self.findChild(QtWidgets.QLabel, 'next_race')
+        self.team_price_label = self.findChild(QtWidgets.QLabel, 'team_price')
+        self.constructor_label = self.findChild(QtWidgets.QLabel, 'constructor')
+        for i in range(1,6):
+            self.driver_labels.append(self.findChild(QtWidgets.QLabel, f'driver{i}'))
+        self.refresh_team_data()
+
+
+
+
     def recent_point_changes(self):
         self.recent_points_change = Recent_Point_Changes()
         self.recent_points_change.show()
@@ -154,8 +166,20 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
     def refresh_team_data(self):
         s = f.connect_to_server()
         s.send(f'return_team-~-{self.username}-~-{self.password}'.encode())
-        result = s.recv(1024).decode()
-        print(result)
+        result = ast.literal_eval(s.recv(1024).decode()[1:-1])
+        self.constructor = result[0].split(' - ')
+        self.drivers = ast.literal_eval(result[1])
+        for i in range(0, 5):
+            driver = self.drivers[i].split(' - ')[0]
+            driver_old_value = self.drivers[i].split(' - ')[1]
+            driver_id = f.convert_name_to_id(driver)
+            driver_value = f.convert_points(f.return_points([driver_id,driver]))
+            driver_percent_change = round((int(driver_value) - int(driver_old_value))/int(driver_old_value)*100, 2)
+            self.driver_labels[i].setText(f'{driver}\n{driver_old_value}\n{driver_value}\n{driver_percent_change}%')
+
+        constructor_new_value = f.convert_points(f.return_points(["",self.constructor[0]]))
+        constructor_percent_change = round((int(constructor_new_value) - int(self.constructor[1]))/int(self.constructor[1])*100, 2)
+        self.constructor_label.setText(f'{self.constructor[0]}\n{self.constructor[1]}\n{constructor_new_value}\n{constructor_percent_change}%')
 
     def edit_team_func(self):
         self.edit_team_ui = Edit_Team(self.username, self.password)
