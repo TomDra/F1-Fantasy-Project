@@ -170,33 +170,33 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.point_calculation_dialogue_box.show()  # show dialogue box
 
     def refresh_team_data(self):
-        next_race = ast.literal_eval(f.get_next_race())
-        self.next_race_label.setText(f'Next Race:\n{next_race[0]}\n{next_race[1]}\n{next_race[2].strip("Z")}')
+        next_race = ast.literal_eval(f.get_next_race()) # get next race date
+        self.next_race_label.setText(f'Next Race:\n{next_race[0]}\n{next_race[1]}\n{next_race[2].strip("Z")}')  # set next race label
         s = f.connect_to_server()
         driver_prices = []
         s.send(f'return_team-~-{self.username}-~-{self.password}'.encode())
-        data = s.recv(1024).decode()[1:-1]
+        data = s.recv(1024).decode()[1:-1]  # get team data from server
         if data:
             result = ast.literal_eval(data)
             print(result)
             self.constructor = result[0].split(' - ')
             self.drivers = ast.literal_eval(result[1])
-            for i in range(0, 5):
-                driver = self.drivers[i].split(' - ')[0]
-                driver_old_value = self.drivers[i].split(' - ')[1]
-                driver_id = f.convert_name_to_id(driver)
-                driver_value = f.convert_points(f.return_points([driver_id,driver]))
+            for i in range(0, 5):  # for each driver in team data
+                driver = self.drivers[i].split(' - ')[0]    # get driver name
+                driver_old_value = self.drivers[i].split(' - ')[1]  # get driver old value
+                driver_id = f.convert_name_to_id(driver)    # get driver id
+                driver_value = f.convert_points(f.return_points([driver_id,driver]))    # get driver value
                 driver_prices.append(int(driver_value))
-                driver_percent_change = round((int(driver_value) - int(driver_old_value))/int(driver_old_value)*100, 2)
-                self.driver_labels[i].setText(f'{driver}\n{driver_old_value}\n{driver_value}\n{driver_percent_change}%')
+                driver_percent_change = round((int(driver_value) - int(driver_old_value))/int(driver_old_value)*100, 2) # calculate percent change
+                self.driver_labels[i].setText(f'{driver}\n{driver_old_value}\n{driver_value}\n{driver_percent_change}%')    # set the text of the label
 
             constructor_new_value = f.convert_points(f.return_points(["",self.constructor[0]]))
             constructor_percent_change = round((int(constructor_new_value) - int(self.constructor[1]))/int(self.constructor[1])*100, 2)
             self.constructor_label.setText(f'{self.constructor[0]}\n{self.constructor[1]}\n{constructor_new_value}\n{constructor_percent_change}%')
-            total_price = sum(driver_prices)+int(constructor_new_value)
+            total_price = sum(driver_prices)+int(constructor_new_value)   # calculate total price
             self.total_value = int(total_price) + int(result[2])
-            self.remaining_price_label.setText(f'Remaining Budget:\n£{result[2]}')
-            self.team_price_label.setText(f'Total Team Price:\n£{total_price}')
+            self.remaining_price_label.setText(f'Remaining Budget:\n£{result[2]}')  # set the text of the label
+            self.team_price_label.setText(f'Total Team Price:\n£{total_price}') # set the text of the label
         else:
             print('No team data')
             self.total_value = None

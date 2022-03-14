@@ -91,9 +91,8 @@ def create_race_file():
     file = open('data/next_race.date', 'w+')
     s = connect_to_server()
     s.send(b'get_next_race')
-    data = s.recv(1024).decode()
-    print(data)
-    file.write(data)
+    data = s.recv(1024).decode()   # get next race date
+    file.write(data)  # save race date
     file.close()
     s.close()
 
@@ -102,7 +101,7 @@ def get_next_race():
         if not os.path.exists('data'):  # Create the data folder if it doesn't exist
             os.makedirs('data')
         create_race_file()
-    if os.path.getmtime('data/next_race.date') / 60 / 60 / 24 < 1:
+    if os.path.getmtime('data/next_race.date') / 60 / 60 / 24 < 1:  # if file is older than 1 day
         create_race_file()
 
     file = open('data/next_race.date')
