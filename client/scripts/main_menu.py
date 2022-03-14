@@ -148,7 +148,7 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.driver_labels = []
         self.next_race_label = self.findChild(QtWidgets.QLabel, 'next_race')
         self.team_price_label = self.findChild(QtWidgets.QLabel, 'team_price')
-        self.remaining_price_label = self.findChild(QtWidgets.QLabel, 'remaning_budget')
+        self.remaining_price_label = self.findChild(QtWidgets.QLabel, 'remaining_budget')
         self.constructor_label = self.findChild(QtWidgets.QLabel, 'constructor')
         for i in range(1,6):
             self.driver_labels.append(self.findChild(QtWidgets.QLabel, f'driver{i}'))

@@ -134,7 +134,7 @@
          </widget>
         </item>
         <item row="0" column="4" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-         <widget class="QLabel" name="remaning_budget">
+         <widget class="QLabel" name="remaining_budget">
           <property name="text">
            <string>Remaning Price</string>
           </property>

@@ -109,7 +109,7 @@ def handle_client_login(client_socket):
     client_socket.send(str([current_drivers, current_constructors]).encode())
   elif request[0] == 'get_next_race':
     data = ast.literal_eval(requests.get('https://ergast.com/api/f1/current/next.json').content.decode())
-    data = data['MRData']['RaceTable']['Races'][0]
+    data = data['MRData']['RaceTable']['Races'][0]  # get useful data
     race_name = data['raceName']
     date = data['date']
     time = data['time']
