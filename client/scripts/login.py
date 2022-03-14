@@ -104,4 +104,5 @@ def login():
     app.exec_() # Start the application
     if window.get_logged_in(): # Return the logged_in value
         return window.get_logged_in_user()
-    # todo: else
+    else:
+        print('Login failed')

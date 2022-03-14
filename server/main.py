@@ -8,7 +8,7 @@ sqliteConnection = sqlite3.connect('teamData.db', check_same_thread=False)
 dataCursor = sqliteConnection.cursor()
 dataCursor.execute("""
 CREATE TABLE IF NOT EXISTS 
-teamData (userID int NOT NULL,team string,drivers, UNIQUE(userID), PRIMARY KEY (userID));
+teamData (userID int NOT NULL,team string,drivers,cash, UNIQUE(userID), PRIMARY KEY (userID));
 """)  #Creates table in the format [userID,team,drivers]
 
 
@@ -36,6 +36,7 @@ def main():
     client.start()
     print(f'Thread for {address} has been created')
     client.join()
+    print(f'Thread for {address} has been joined')
     sqliteConnection.commit() # save changes to the database
 
 
@@ -44,10 +45,10 @@ def handle_client(client_socket):
   sqliteConnection.commit()
 
 
-def save_team(userID, constructor, drivers):
+def save_team(userID, constructor, drivers, spare_cash):
   """Save the team data to the database"""
   """IF DATA EXISTS, UPDATE IT"""
-  dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers) VALUES ({userID}, "{constructor}", "{drivers}")')
+  dataCursor.execute(f'INSERT OR REPLACE INTO teamData (userID, team, drivers, cash) VALUES ({userID}, "{constructor}", "{drivers}", {spare_cash})')
   sqliteConnection.commit()
   return True
 
@@ -55,7 +56,7 @@ def save_team(userID, constructor, drivers):
 def return_team(userID):
   """Return the team data from the database"""
   """IF DATA EXISTS, RETURN IT"""
-  data = dataCursor.execute(f'SELECT team, drivers FROM teamData WHERE userID = {userID}').fetchall()
+  data = dataCursor.execute(f'SELECT team, drivers, cash FROM teamData WHERE userID = {userID}').fetchall()
   print(data)
   return data
 

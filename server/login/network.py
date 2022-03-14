@@ -1,6 +1,6 @@
 import sqlite3
 import time
-
+import ast, requests
 from argon2 import PasswordHasher
 import socket
 import threading, json
@@ -80,10 +80,10 @@ def handle_client_login(client_socket):
     if result:  # if login is successful
       return True
   elif request[0] == 'save_team':
-    """request in form [save_team, username, password, team_data, driver_data]"""
+    """request in form [save_team, username, password, team_data, driver_data, spare_cash]"""
     if login(request[1], request[2]):  # if login is successful
       userID = cursor.execute(f'SELECT userID FROM logins WHERE username = "{request[1]}"').fetchall()[0][0]
-      result = save_team(userID, request[3], request[4]) # save team
+      result = save_team(userID, request[3], request[4], request[5]) # save team
     client_socket.send(str(result).encode())
   elif request[0] == 'return_team':
     """request in form [return_team, username, password]"""
@@ -107,6 +107,13 @@ def handle_client_login(client_socket):
     current_drivers = current_drivers.read()
     current_constructors = current_constructors.read()
     client_socket.send(str([current_drivers, current_constructors]).encode())
+  elif request[0] == 'get_next_race':
+    data = ast.literal_eval(requests.get('https://ergast.com/api/f1/current/next.json').content.decode())
+    data = data['MRData']['RaceTable']['Races'][0]
+    race_name = data['raceName']
+    date = data['date']
+    time = data['time']
+    client_socket.send(str([race_name, date, time]).encode())
   else:
     client_socket.send(b'Invalid Request')
   return False

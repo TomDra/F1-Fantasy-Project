@@ -67,9 +67,9 @@ def return_points(driver):
             print(driver, 'Driver/ Constructor not in point data')
 
 
-def send_team_data(username, password, driver_data, constructor_data):
+def send_team_data(username, password, driver_data, constructor_data, spare_cash):
     s = connect_to_server()
-    s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}'.encode())
+    s.send(f'save_team-~-{username}-~-{password}-~-{constructor_data}-~-{driver_data}-~-{spare_cash}'.encode())
     result = s.recv(1024).decode()
     return result
 
@@ -86,3 +86,26 @@ def convert_name_to_id(name):
 
 def convert_points(points):
     return str(250 + int(points)*20)
+
+def create_race_file():
+    file = open('data/next_race.date', 'w+')
+    s = connect_to_server()
+    s.send(b'get_next_race')
+    data = s.recv(1024).decode()
+    print(data)
+    file.write(data)
+    file.close()
+    s.close()
+
+def get_next_race():
+    if not os.path.exists('data/next_race.date'):
+        if not os.path.exists('data'):  # Create the data folder if it doesn't exist
+            os.makedirs('data')
+        create_race_file()
+    if os.path.getmtime('data/next_race.date') / 60 / 60 / 24 < 1:
+        create_race_file()
+
+    file = open('data/next_race.date')
+    data = file.read()
+    file.close()
+    return data

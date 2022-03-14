@@ -41,11 +41,12 @@ class Point_Calculation_Dialogue_Box(QtWidgets.QDialog):
         self.ok_button.clicked.connect(self.close)  # close dialogue box when ok is clicked
 
 class Edit_Team(QtWidgets.QMainWindow):
-    def __init__(self, username, password):
+    def __init__(self, username, password, total_value):
         super(Edit_Team, self).__init__()
         uic.loadUi('gui_files/edit_team.ui', self)
         self.username = username
         self.password = password
+        self.total_value = total_value
         self.finished = False
         self.setWindowTitle('Edit Team')  # set title
         '''find combo boxes and buttons'''
@@ -56,7 +57,7 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.remaining_money_label = self.findChild(QtWidgets.QLabel, 'remaining_money')
         self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_money')
 
-        self.set_combo_box_data() # set driver and constructor combobox items
+        self.set_combo_box_data()  # set driver and constructor combobox items
         self.submit_button.clicked.connect(self.submit_button_clicked)
         threading.Thread(target=self.label_edit_loop).start()
         self.show()
@@ -85,15 +86,19 @@ class Edit_Team(QtWidgets.QMainWindow):
         for i in range(1, 6):
             driver_data.append(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText())
         constructor_data = self.constructor_combobox.currentText()
+        spare_cash = self.remaining_money
         # send the data to the server
-        result = f.send_team_data(self.username, self.password, driver_data, constructor_data)
+        result = f.send_team_data(self.username, self.password, driver_data, constructor_data, spare_cash)
         if result == 'True':
             self.close()
 
     def label_edit_loop(self):
         """Loop to update the labels"""
         if self.total_money_label.text() == 'PLACEHOLDER':
-            self.total_money_label.setText('1000000')
+            if self.total_value:
+                self.total_money_label.setText(str(self.total_value))
+            else:
+                self.total_money_label.setText('1000000')
         while self.finished == False:
             time.sleep(0.5)
             driver_data = []
@@ -107,9 +112,9 @@ class Edit_Team(QtWidgets.QMainWindow):
             except IndexError:
                 constructor_data = 0
             total = sum(driver_data)+constructor_data
-            remaining_money = int(self.total_money_label.text()) - total
+            self.remaining_money = int(self.total_money_label.text()) - total
             self.total_team_value_label.setText(str(total))  # set label text
-            self.remaining_money_label.setText(str(remaining_money))  # set label text
+            self.remaining_money_label.setText(str(self.remaining_money))  # set label text
 
     def closeEvent(self, event):
         self.finished = True
@@ -143,6 +148,7 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.driver_labels = []
         self.next_race_label = self.findChild(QtWidgets.QLabel, 'next_race')
         self.team_price_label = self.findChild(QtWidgets.QLabel, 'team_price')
+        self.remaining_price_label = self.findChild(QtWidgets.QLabel, 'remaning_budget')
         self.constructor_label = self.findChild(QtWidgets.QLabel, 'constructor')
         for i in range(1,6):
             self.driver_labels.append(self.findChild(QtWidgets.QLabel, f'driver{i}'))
@@ -164,25 +170,39 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.point_calculation_dialogue_box.show()  # show dialogue box
 
     def refresh_team_data(self):
+        next_race = ast.literal_eval(f.get_next_race())
+        self.next_race_label.setText(f'Next Race:\n{next_race[0]}\n{next_race[1]}\n{next_race[2].strip("Z")}')
         s = f.connect_to_server()
+        driver_prices = []
         s.send(f'return_team-~-{self.username}-~-{self.password}'.encode())
-        result = ast.literal_eval(s.recv(1024).decode()[1:-1])
-        self.constructor = result[0].split(' - ')
-        self.drivers = ast.literal_eval(result[1])
-        for i in range(0, 5):
-            driver = self.drivers[i].split(' - ')[0]
-            driver_old_value = self.drivers[i].split(' - ')[1]
-            driver_id = f.convert_name_to_id(driver)
-            driver_value = f.convert_points(f.return_points([driver_id,driver]))
-            driver_percent_change = round((int(driver_value) - int(driver_old_value))/int(driver_old_value)*100, 2)
-            self.driver_labels[i].setText(f'{driver}\n{driver_old_value}\n{driver_value}\n{driver_percent_change}%')
+        data = s.recv(1024).decode()[1:-1]
+        if data:
+            result = ast.literal_eval(data)
+            print(result)
+            self.constructor = result[0].split(' - ')
+            self.drivers = ast.literal_eval(result[1])
+            for i in range(0, 5):
+                driver = self.drivers[i].split(' - ')[0]
+                driver_old_value = self.drivers[i].split(' - ')[1]
+                driver_id = f.convert_name_to_id(driver)
+                driver_value = f.convert_points(f.return_points([driver_id,driver]))
+                driver_prices.append(int(driver_value))
+                driver_percent_change = round((int(driver_value) - int(driver_old_value))/int(driver_old_value)*100, 2)
+                self.driver_labels[i].setText(f'{driver}\n{driver_old_value}\n{driver_value}\n{driver_percent_change}%')
 
-        constructor_new_value = f.convert_points(f.return_points(["",self.constructor[0]]))
-        constructor_percent_change = round((int(constructor_new_value) - int(self.constructor[1]))/int(self.constructor[1])*100, 2)
-        self.constructor_label.setText(f'{self.constructor[0]}\n{self.constructor[1]}\n{constructor_new_value}\n{constructor_percent_change}%')
+            constructor_new_value = f.convert_points(f.return_points(["",self.constructor[0]]))
+            constructor_percent_change = round((int(constructor_new_value) - int(self.constructor[1]))/int(self.constructor[1])*100, 2)
+            self.constructor_label.setText(f'{self.constructor[0]}\n{self.constructor[1]}\n{constructor_new_value}\n{constructor_percent_change}%')
+            total_price = sum(driver_prices)+int(constructor_new_value)
+            self.total_value = int(total_price) + int(result[2])
+            self.remaining_price_label.setText(f'Remaining Budget:\n£{result[2]}')
+            self.team_price_label.setText(f'Total Team Price:\n£{total_price}')
+        else:
+            print('No team data')
+            self.total_value = None
 
     def edit_team_func(self):
-        self.edit_team_ui = Edit_Team(self.username, self.password)
+        self.edit_team_ui = Edit_Team(self.username, self.password, self.total_value)
         self.edit_team_ui.show()
 
     def sign_out(self):
