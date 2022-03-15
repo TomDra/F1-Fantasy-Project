@@ -106,5 +106,9 @@ def get_next_race():
 
     file = open('data/next_race.date')
     data = file.read()
+    if data == "['N', '/', 'A']":
+        create_race_file()
+        file = open('data/next_race.date')
+        data = file.read()
     file.close()
     return data

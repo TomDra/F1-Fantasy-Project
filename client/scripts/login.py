@@ -100,9 +100,9 @@ class Ui(QtWidgets.QMainWindow):
 
 def login():
     app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
-    window = Ui() # Create an instance of our class
-    app.exec_() # Start the application
-    if window.get_logged_in(): # Return the logged_in value
+    window = Ui()  # Create an instance of our class
+    app.exec_()  # Start the application
+    if window.get_logged_in():  # Return the logged_in value
         return window.get_logged_in_user()
     else:
         print('Login failed')

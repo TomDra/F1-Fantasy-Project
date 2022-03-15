@@ -57,6 +57,8 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.remaining_money_label = self.findChild(QtWidgets.QLabel, 'remaining_money')
         self.total_money_label = self.findChild(QtWidgets.QLabel, 'total_money')
 
+        self.errorbox_label = self.findChild(QtWidgets.QLabel, 'errorbox')
+
         self.set_combo_box_data()  # set driver and constructor combobox items
         self.submit_button.clicked.connect(self.submit_button_clicked)
         threading.Thread(target=self.label_edit_loop).start()
@@ -88,9 +90,13 @@ class Edit_Team(QtWidgets.QMainWindow):
         constructor_data = self.constructor_combobox.currentText()
         spare_cash = self.remaining_money
         # send the data to the server
-        result = f.send_team_data(self.username, self.password, driver_data, constructor_data, spare_cash)
-        if result == 'True':
-            self.close()
+        if 'Driver' in driver_data or constructor_data == 'Constructor':
+            self.errorbox_label.setStyleSheet('color: red')
+            self.errorbox_label.setText('Please Select each driver/ constructor')
+        else:
+            result = f.send_team_data(self.username, self.password, driver_data, constructor_data, spare_cash)
+            if result == 'True':
+                self.close()
 
     def label_edit_loop(self):
         """Loop to update the labels"""
