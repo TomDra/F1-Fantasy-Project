@@ -6,6 +6,7 @@ import time
 import threading
 import functions as f
 from scripts.login import LoginUser
+import scripts.chat as chat
 
 class Recent_Point_Changes(QtWidgets.QDialog):
     """Display the point changes dialog box"""
@@ -106,7 +107,7 @@ class Edit_Team(QtWidgets.QMainWindow):
             else:
                 self.total_money_label.setText('1000000')
         while self.finished == False:
-            time.sleep(0.5)
+            time.sleep(0.2)
             driver_data = []
             for i in range(1, 6):   # for each combo box
                 try:    # if there is data to collect
@@ -124,6 +125,8 @@ class Edit_Team(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.finished = True
+
+
 
 class Main_Menu_Ui(QtWidgets.QMainWindow):
     def __init__(self, temp_username, temp_password):
@@ -161,7 +164,27 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.refresh_team_data()
 
 
+        '''chat attributes'''
+        self.chat_submit_button = self.findChild(QtWidgets.QPushButton, 'chat_submit_button')
+        self.chat_input_box = self.findChild(QtWidgets.QLineEdit, 'chat_input')
+        self.chat_output_label = self.findChild(QtWidgets.QLabel, 'chat_output')
+        self.chat_submit_button.clicked.connect(self.chat_submit)
+        threading.Thread(target=self.refresh_chat_loop).start()
 
+
+    def chat_submit(self):
+        message = self.chat_input_box.text()
+        self.chat_input_box.clear()
+        chat.output(message, self.username)
+
+    def refresh_chat(self):
+        chats = chat.get_chats()
+        self.chat_output_label.setText(chats)
+
+    def refresh_chat_loop(self):
+        while True:
+            self.refresh_chat()
+            time.sleep(0.5)
 
     def recent_point_changes(self):
         self.recent_points_change = Recent_Point_Changes()

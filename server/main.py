@@ -2,6 +2,7 @@
 import sqlite3
 import socket
 import threading
+import chat.chat_server as chat
 
 
 sqliteConnection = sqlite3.connect('teamData.db', check_same_thread=False)
@@ -60,13 +61,27 @@ def return_team(userID):
   print(data)
   return data
 
+def chat_server():
+  """Create server connection"""
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind(('localhost', 9988))
+  s.listen(5)
+  print('Chat Server started')
+  """Create a thread for each client"""
+  while True:
+    client_socket, address = s.accept()
+    client = threading.Thread(target=chat.handle_client, args=(client_socket,))  # create a thread for each client
+    client.start()
+    client.join()
+    print(f'Chat Connection from {address} has been established, started, and joined')
 
 if __name__ == '__main__':
   try:
-    create_driver_points()
+    #create_driver_points()
     pass
   except SyntaxError:
     print('API Offline')
+  threading.Thread(target=chat_server).start()
   main()
   sqliteConnection.commit()  # save changes to the database
 

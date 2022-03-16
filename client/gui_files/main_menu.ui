@@ -91,17 +91,10 @@
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
         </property>
-        <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-         <widget class="QLabel" name="team_price">
+        <item row="3" column="4" alignment="Qt::AlignHCenter">
+         <widget class="QLabel" name="driver5">
           <property name="text">
-           <string>Team Price</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2" alignment="Qt::AlignHCenter">
-         <widget class="QLabel" name="driver4">
-          <property name="text">
-           <string>Driver4</string>
+           <string>Driver5</string>
           </property>
          </widget>
         </item>
@@ -119,24 +112,10 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-         <widget class="QLabel" name="constructor">
+        <item row="3" column="2" alignment="Qt::AlignHCenter">
+         <widget class="QLabel" name="driver4">
           <property name="text">
-           <string>Constructor</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="4" alignment="Qt::AlignHCenter">
-         <widget class="QLabel" name="driver5">
-          <property name="text">
-           <string>Driver5</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-         <widget class="QLabel" name="remaining_budget">
-          <property name="text">
-           <string>Remaning Price</string>
+           <string>Driver4</string>
           </property>
          </widget>
         </item>
@@ -144,6 +123,27 @@
          <widget class="QLabel" name="driver3">
           <property name="text">
            <string>Driver3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="QLabel" name="team_price">
+          <property name="text">
+           <string>Team Price</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="QLabel" name="constructor">
+          <property name="text">
+           <string>Constructor</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="QLabel" name="remaining_budget">
+          <property name="text">
+           <string>Remaning Price</string>
           </property>
          </widget>
         </item>
@@ -221,12 +221,12 @@
       <item row="0" column="2">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QScrollArea" name="chat_output">
+         <widget class="QScrollArea" name="chat_output_area">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -254,29 +254,35 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>190</width>
-             <height>273</height>
+             <width>194</width>
+             <height>283</height>
             </rect>
            </property>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="chat_output">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
               <width>220</width>
-              <height>16</height>
+              <height>16777215</height>
              </rect>
             </property>
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
+              <verstretch>99</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>16777215</height>
+             </size>
             </property>
             <property name="baseSize">
              <size>
               <width>0</width>
-              <height>0</height>
+              <height>-13825</height>
              </size>
             </property>
             <property name="autoFillBackground">
@@ -285,28 +291,54 @@
             <property name="text">
              <string>Chat:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
            </widget>
           </widget>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="chat_input">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>2</number>
           </property>
-          <property name="styleSheet">
-           <string notr="true">placeholder=&quot;Type Message here&quot;</string>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
           </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="placeholderText">
-           <string>Type Message Here</string>
-          </property>
-         </widget>
+          <item alignment="Qt::AlignBottom">
+           <widget class="QLineEdit" name="chat_input">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">placeholder=&quot;Type Message here&quot;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="placeholderText">
+             <string>Type Message Here</string>
+            </property>
+           </widget>
+          </item>
+          <item alignment="Qt::AlignRight|Qt::AlignBottom">
+           <widget class="QPushButton" name="chat_submit_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Submit</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -320,7 +352,7 @@
      <x>0</x>
      <y>0</y>
      <width>615</width>
-     <height>22</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>
