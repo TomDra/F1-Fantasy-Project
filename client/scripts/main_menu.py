@@ -86,17 +86,17 @@ class Edit_Team(QtWidgets.QMainWindow):
         self.finished = True
         # get the data from the combo boxes
         driver_data = []
-        for i in range(1, 6):
+        for i in range(1, 6):  # get all the chosen drivers
             driver_data.append(self.findChild(QtWidgets.QComboBox, f'driver_drop{i}').currentText())
-        constructor_data = self.constructor_combobox.currentText()
+        constructor_data = self.constructor_combobox.currentText()  # get the chosen constructor
         spare_cash = self.remaining_money
         # send the data to the server
-        if 'Driver' in driver_data or constructor_data == 'Constructor':
+        if 'Driver' in driver_data or constructor_data == 'Constructor':  # check if data is valid
             self.errorbox_label.setStyleSheet('color: red')
-            self.errorbox_label.setText('Please Select each driver/ constructor')
+            self.errorbox_label.setText('Please Select each driver/ constructor')  # show error message
         else:
             result = f.send_team_data(self.username, self.password, driver_data, constructor_data, spare_cash)
-            if result == 'True':
+            if result == 'True':    # check if data was sent successfully
                 self.close()
 
     def label_edit_loop(self):
@@ -178,13 +178,13 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         chat.output(message, self.username)
 
     def refresh_chat(self):
-        chats = chat.get_chats()
+        chats = chat.get_chats().replace(': ', ': \n')
         self.chat_output_label.setText(chats)
 
     def refresh_chat_loop(self):
         while True:
             self.refresh_chat()
-            time.sleep(0.5)
+            time.sleep(3)
 
     def recent_point_changes(self):
         self.recent_points_change = Recent_Point_Changes()

@@ -1,4 +1,4 @@
-import socket,ast
+import socket,ast,datetime
 
 def connect_to_chat_server():
     f = open('scripts/connect.private', 'r')    # Open the file containing the ip and port
@@ -12,7 +12,8 @@ def connect_to_chat_server():
 def output(chat_message, username):
     '''use sockets and to connect to the server and send the message'''
     s = connect_to_chat_server()
-    s.send(f'["send","{username}: {chat_message}"]'.encode())
+    time = datetime.datetime.now().strftime("%H:%M:%S")
+    s.send(f'["send","[{time}] - {username}: {chat_message}"]'.encode())
     s.close()
 
 def get_chats():

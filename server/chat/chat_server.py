@@ -7,7 +7,6 @@ def handle_client(client_socket):
     """
     # Receive the message
     request = client_socket.recv(1024)
-    print(request)
     request = ast.literal_eval(request.decode())
     if request[0] == 'send':
         chat_list.append(request[1])
@@ -16,7 +15,6 @@ def handle_client(client_socket):
         for item in chat_list:
             chat_log = chat_log + '\n' + item
         client_socket.send(chat_log.encode())
-    print(request)
     # Send the message back
 
     # Close the connection
