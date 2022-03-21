@@ -1,9 +1,9 @@
-import ast,socket
+import ast
 chat_list = []
 
 def handle_client(client_socket):
     """
-    Handle a client connection.
+    Handle a client connection for the chat server.
     """
     # Receive the message
     request = client_socket.recv(1024)
@@ -19,3 +19,4 @@ def handle_client(client_socket):
 
     # Close the connection
     client_socket.close()
+

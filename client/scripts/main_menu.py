@@ -173,9 +173,9 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
 
 
     def chat_submit(self):
-        message = self.chat_input_box.text()
+        message = self.chat_input_box.text()  # get text from input box
         self.chat_input_box.clear()
-        chat.output(message, self.username)
+        chat.output(message, self.username)  # run output function
 
     def refresh_chat(self):
         chats = chat.get_chats().replace(': ', ': \n')

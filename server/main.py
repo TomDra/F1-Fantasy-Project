@@ -77,11 +77,12 @@ def chat_server():
 
 if __name__ == '__main__':
   try:
-    #create_driver_points()
-    pass
+    create_driver_points()
   except SyntaxError:
     print('API Offline')
+  '''Start chat server'''
   threading.Thread(target=chat_server).start()
+  '''Start main server'''
   main()
   sqliteConnection.commit()  # save changes to the database
 
