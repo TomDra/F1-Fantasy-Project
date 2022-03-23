@@ -77,7 +77,8 @@ def chat_server():
 
 if __name__ == '__main__':
   try:
-    create_driver_points()
+    #create_driver_points()
+    pass
   except SyntaxError:
     print('API Offline')
   '''Start chat server'''
