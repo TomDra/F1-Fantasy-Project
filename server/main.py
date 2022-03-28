@@ -58,7 +58,6 @@ def return_team(userID):
   """Return the team data from the database"""
   """IF DATA EXISTS, RETURN IT"""
   data = dataCursor.execute(f'SELECT team, drivers, cash FROM teamData WHERE userID = {userID}').fetchall()
-  print(data)
   return data
 
 def chat_server():
@@ -77,7 +76,7 @@ def chat_server():
 
 if __name__ == '__main__':
   try:
-    #create_driver_points()
+    create_driver_points()
     pass
   except SyntaxError:
     print('API Offline')

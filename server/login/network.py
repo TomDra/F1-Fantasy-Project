@@ -70,7 +70,6 @@ def handle_client_login(client_socket):
     """request in form [register, username, password]"""
     result = register(request[1], request[2])
     sqliteConnection.commit()   # commit changes to database
-    print(result)
     client_socket.send(str(result).encode())
   elif request[0] == 'login':
     """request in form [login, username, password]"""
