@@ -182,13 +182,14 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         self.chat_output_label.setText(chats)
 
     def refresh_chat_loop(self):
+        # refresh chat every 3 seconds
         while True:
             self.refresh_chat()
             time.sleep(3)
 
     def recent_point_changes(self):
         self.recent_points_change = Recent_Point_Changes()
-        self.recent_points_change.show()
+        self.recent_points_change.show()  # show the window
 
     def how_to_play(self):
         self.htp_dialogue_box = HTP_Dialogue_Box()
@@ -205,7 +206,7 @@ class Main_Menu_Ui(QtWidgets.QMainWindow):
         driver_prices = []
         s.send(f'return_team-~-{self.username}-~-{self.password}'.encode())
         data = s.recv(1024).decode()[1:-1]  # get team data from server
-        if data:
+        if data:  # if the user has team data
             result = ast.literal_eval(data)
             print(result)
             self.constructor = result[0].split(' - ')

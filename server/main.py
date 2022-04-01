@@ -81,7 +81,7 @@ if __name__ == '__main__':
   except SyntaxError:
     print('API Offline')
   '''Start chat server'''
-  threading.Thread(target=chat_server).start()
+  threading.Thread(target=chat_server).start()  # create a thread for the chat server
   '''Start main server'''
   main()
   sqliteConnection.commit()  # save changes to the database

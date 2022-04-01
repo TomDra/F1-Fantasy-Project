@@ -96,14 +96,16 @@ def assign_driver_points(rData): #use race data to assign points to the driver
   except KeyError as a:
     print(a)
 
-def save_points(driver1,driver2,team,year,round,rName): #save the points to a csv file
-  if int(year) == date.today().year:
+
+def save_points(driver1,driver2,team,year,round,rName): # save the points to the queue
+  if int(year) == date.today().year:  # If it is this year, increase all points 10x
     team[1] = int(team[1])*10
     driver1[1] = int(driver1[1])*10
     driver2[1] = int(driver2[1])*10
-  lock.acquire()
+  lock.acquire()  # Lock the queue
   q.put(f"{year},{round},{rName},{team[0]},{team[1]},{driver1[0]},{driver1[1]},{driver2[0]},{driver2[1]}\n")  #Add the data to the queue
-  lock.release()
+  lock.release()  # Unlock the queue
+
 
 def get_points(driver1_data,driver2_data): #Get all data required to calculate points for both drivers
   drivers_data = [[int(driver1_data['fPosition']),int(driver1_data['gPosition']),int(driver1_data['fastPosition']),int(driver2_data['fPosition'])],
@@ -165,12 +167,12 @@ def split_driver_points():
     driver2_points = line[8]
     """take all points for each driver and append them to a list in a dictionary for that driver"""
     variable_set = [[driver1,driver1_points,drivers],[driver2,driver2_points,drivers],[team,team_points,teams]]
-    for driver in variable_set:
+    for driver in variable_set:  # iterate through each driver
       if driver[0] in driver[2]:
         driver[2][driver[0]].append(int(driver[1]))
       else:
         driver[2][driver[0]] = [int(driver[1])]
-    """Add the points in the list together and replace the list with a total"""
+  """Add the points in the list together and replace the list with a total"""
   for team in teams:
     teams[team]=sum(teams[team])
   for driver in drivers:
@@ -195,7 +197,3 @@ if __name__ == '__main__':
   get_race_data()
   print(f"Runtime of the program is {time.time() - start}")
   split_driver_points()
-
-
-#https://ergast.com/api/f1/constructorstandings/1.json?limit=9999&offset=30
-#https://ergast.com/api/f1/driverstandings/1.json?limit=9999&offset=30

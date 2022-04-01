@@ -1,5 +1,5 @@
 import datetime
-import os,socket, ast, json
+import os,socket, ast
 
 
 def connect_to_server():
@@ -49,7 +49,7 @@ def create_points_file():
 
 def return_points(driver):
     if not os.path.exists('data/points.json'):
-        if not os.path.exists(('data')):
+        if not os.path.exists('data'):
             os.makedirs('data')
         create_points_file()
     f = open('data/points.json')
@@ -106,7 +106,7 @@ def get_next_race():
 
     file = open('data/next_race.date')
     data = file.read()
-    if data == "['N', '/', 'A']":
+    if data == "['N', '/', 'A']":   # if no data saved, request again
         create_race_file()
         file = open('data/next_race.date')
         data = file.read()
