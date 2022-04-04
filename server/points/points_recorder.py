@@ -97,7 +97,7 @@ def assign_driver_points(rData): #use race data to assign points to the driver
     print(a)
 
 
-def save_points(driver1,driver2,team,year,round,rName): # save the points to the queue
+def save_points(driver1, driver2, team, year, round, rName):  # save the points to the queue
   if int(year) == date.today().year:  # If it is this year, increase all points 10x
     team[1] = int(team[1])*10
     driver1[1] = int(driver1[1])*10
